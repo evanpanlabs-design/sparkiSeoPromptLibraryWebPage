@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive AR Fashion Try-On — Veo Prompt Library</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f0fdff;
+            --bg-tertiary: #e6f7ff;
+            --text-primary: #0a0a0a;
+            --text-secondary: #404040;
+            --text-tertiary: #737373;
+            --border: #d0e8ff;
+            --border-strong: #a5d4ff;
+            --accent: #3B82F6;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 48px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+        .nav-logo { font-size: 18px; font-weight: 700; color: var(--text-primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-center { display: flex; gap: 32px; }
+        .nav-center a { text-decoration: none; color: var(--text-secondary); font-size: 14px; font-weight: 500; }
+        .nav-center a:hover, .nav-center a.active { color: var(--text-primary); }
+        .detail-page { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+        .back-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; }
+        .back-nav a { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-secondary); font-size: 14px; font-weight: 500; }
+        .back-nav a:hover { color: var(--text-primary); }
+        .detail-header { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; align-items: start; }
+        .detail-image { width: 100%; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; border: 1px solid #808080; background: var(--bg-tertiary); }
+        .detail-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .image-x-link { position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: rgba(255,255,255,0.92); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+        .detail-image-wrap { position: relative; }
+        .detail-info { display: flex; flex-direction: column; gap: 24px; }
+        .detail-category { display: inline-block; align-self: flex-start; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 10px; border-radius: 20px; color: white; background: var(--accent); }
+        .detail-title { font-size: 26px; font-weight: 700; line-height: 1.3; letter-spacing: -0.5px; }
+        .detail-author { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .author-col { padding: 14px 18px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .author-col:not(:last-child) { border-right: 1px solid var(--border); }
+        .author-col-name { font-size: 15px; font-weight: 600; }
+        .author-col-handle { font-size: 12px; color: var(--accent); }
+        .author-col-followers { font-size: 12px; color: var(--text-tertiary); }
+        .detail-stats { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .detail-stat { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .detail-stat:not(:last-child) { border-right: 1px solid var(--border); }
+        .detail-stat-value { font-size: 18px; font-weight: 700; }
+        .detail-stat-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-actions { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 11px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 7px; border: 2px solid transparent; }
+        .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
+        .btn-primary:hover { background: #2563eb; border-color: #2563eb; }
+        .btn-outline { background: white; border-color: var(--border-strong); color: var(--text-primary); }
+        .btn-outline:hover { background: var(--bg-secondary); border-color: var(--accent); color: var(--accent); }
+        .detail-section { border-top: 1px solid var(--border); padding-top: 32px; margin-bottom: 40px; }
+        .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); margin-bottom: 12px; }
+        .prompt-text-block { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; }
+        .prompt-text-content { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text-primary); color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; z-index: 9999; transition: transform 0.3s ease; pointer-events: none; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .share-popover { position: absolute; top: 56px; right: 0; background: white; border: 1px solid var(--border); border-radius: 10px; padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-width: 180px; z-index: 200; display: none; }
+        .share-popover.open { display: block; }
+        .share-popover button { width: 100%; text-align: left; padding: 9px 12px; border: none; background: transparent; font-size: 13px; color: var(--text-primary); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .share-popover button:hover { background: var(--bg-secondary); }
+        .share-popover .divider { height: 1px; background: var(--border); margin: 4px 0; }
+        .recs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .recs-header h3 { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+        .recs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .rec-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; text-decoration: none; color: inherit; transition: all 0.15s; }
+        .rec-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px var(--accent-glow); }
+        .rec-card-image { aspect-ratio: 16/9; overflow: hidden; background: var(--bg-tertiary); }
+        .rec-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .rec-card-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .rec-card-category { display: inline-block; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 20px; color: white; background: var(--accent); align-self: flex-start; }
+        .rec-card-title { font-size: 12px; font-weight: 500; color: var(--text-primary); line-height: 1.4; }
+        @media (max-width: 768px) { nav { padding: 14px 20px; } .nav-center { display: none; } .detail-header { grid-template-columns: 1fr; } .detail-title { font-size: 22px; } .detail-page { padding: 24px 16px 60px; } .recs-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="../index.html" class="nav-logo">
+        <img src="https://sparki.io/_next/image?url=%2Flogo-text.svg&w=256&q=75" alt="Sparki" style="height:28px;">
+    </a>
+    <div class="nav-center">
+        <a href="../index.html">Prompts</a>
+        <a href="#" class="active">Prompt Detail</a>
+    </div>
+</nav>
+
+<div class="detail-page">
+    <div class="back-nav">
+        <a href="../index.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back to Prompts
+        </a>
+    </div>
+
+    <div class="detail-header">
+        <div class="detail-image-wrap">
+            <div class="detail-image">
+                <img src="../generated_images/136.png" alt="Interactive AR Fashion Try-On" onerror="this.src='https://picsum.photos/seed/2022040775450931402/1100/618'">
+            </div>
+            <a href="https://x.com/Aitrendstools/status/2022040775450931402" target="_blank" class="image-x-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+        </div>
+
+        <div class="detail-info">
+            <span class="detail-category">social media content</span>
+            <h1 class="detail-title">Interactive AR Fashion Try-On</h1>
+
+            <div class="detail-author">
+                <div class="author-col">
+                    <span class="author-col-name">AI Trends</span>
+                </div>
+                <div class="author-col">
+                    <span class="author-col-handle">@Aitrendstools</span>
+                </div>
+                <div class="author-col">
+                    <span class="author-col-followers">0</span>
+                </div>
+            </div>
+
+            <div class="detail-stats">
+                <div class="detail-stat">
+                    <div class="detail-stat-value">0</div>
+                    <div class="detail-stat-label">Likes</div>
+                </div>
+                <div class="detail-stat">
+                    <div class="detail-stat-value">0</div>
+                    <div class="detail-stat-label">Retweets</div>
+                </div>
+                <div class="detail-stat">
+                    <div class="detail-stat-value">0</div>
+                    <div class="detail-stat-label">Replies</div>
+                </div>
+                <div class="detail-stat">
+                    <div class="detail-stat-value">0</div>
+                    <div class="detail-stat-label">Followers</div>
+                </div>
+            </div>
+
+            <div class="detail-actions">
+                <a href="#" class="btn btn-primary" onclick="copyPromptText(event, "A high-energy, colorful social media commercial shot featuring a man with uploaded face as reference standing in a minimalist urban loft. He is swiping on a smartphone, and with every swipe, a different hyper-realistic 3D outfit (a leather jacket, a puffer vest, a tailored blazer) physically materializes and \"wraps\" around him in mid-air with a glowing digital glitch effect. Floating around him are interactive \"Add to Cart\" buttons and size-selection icons in 3D glass morphism style. The lighting is a mix of natural window light and vibrant neon accents from the digital interface. 8k resolution, ultra-fast shutter speed, and high-fashion aesthetic.")">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    Copy Prompt
+                </a>
+                <div style="position:relative; flex: 1;">
+                    <a href="#" class="btn btn-outline" onclick="toggleSharePopover(event)" style="width:100%;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        Share
+                    </a>
+                    <div class="share-popover" id="share-popover">
+                        <button onclick="shareTwitter()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            Share on X
+                        </button>
+                        <button onclick="copyLink()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                            Copy Link
+                        </button>
+                        <div class="divider"></div>
+                        <button onclick="tryPrompt()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            Try on Veo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-section">
+        <div class="section-label">Prompt</div>
+        <div class="prompt-text-block">
+            <div class="prompt-text-content">A high-energy, colorful social media commercial shot featuring a man with uploaded face as reference standing in a minimalist urban loft. He is swiping on a smartphone, and with every swipe, a different hyper-realistic 3D outfit (a leather jacket, a puffer vest, a tailored blazer) physically materializes and "wraps" around him in mid-air with a glowing digital glitch effect. Floating around him are interactive "Add to Cart" buttons and size-selection icons in 3D glass morphism style. The lighting is a mix of natural window light and vibrant neon accents from the digital interface. 8k resolution, ultra-fast shutter speed, and high-fashion aesthetic.</div>
+        </div>
+    </div>
+
+    
+
+    <div class="recommendations-section">
+        <div class="recs-header">
+            <h3>Same Category</h3>
+        </div>
+        <div class="recs-grid">
+<a href="2037516504175108274.html" class="rec-card">
+                <div class="rec-card-image">
+                    <img src="../generated_images/69.png" alt="Jumping on a Custom Material Bed" onerror="this.src='https://picsum.photos/seed/2037516504175108274/550/307'">
+                </div>
+                <div class="rec-card-body">
+                    <span class="rec-card-category">social media content</span>
+                    <div class="rec-card-title">Jumping on a Custom Material Bed</div>
+                </div>
+            </a>
+<a href="2033858017628672036.html" class="rec-card">
+                <div class="rec-card-image">
+                    <img src="../generated_images/80.png" alt="Funny Street Interview with Grandfather" onerror="this.src='https://picsum.photos/seed/2033858017628672036/550/307'">
+                </div>
+                <div class="rec-card-body">
+                    <span class="rec-card-category">social media content</span>
+                    <div class="rec-card-title">Funny Street Interview with Grandfather</div>
+                </div>
+            </a>
+<a href="2027037622825091120.html" class="rec-card">
+                <div class="rec-card-image">
+                    <img src="../generated_images/109.png" alt="Pilates Instructor Studio Intro" onerror="this.src='https://picsum.photos/seed/2027037622825091120/550/307'">
+                </div>
+                <div class="rec-card-body">
+                    <span class="rec-card-category">social media content</span>
+                    <div class="rec-card-title">Pilates Instructor Studio Intro</div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2000);
+}
+
+function copyPromptText(e, text) {
+    e.preventDefault();
+    navigator.clipboard.writeText(text).then(function() { showToast('Prompt copied!'); });
+}
+
+function toggleSharePopover(e) {
+    e.preventDefault();
+    document.getElementById('share-popover').classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.detail-actions')) {
+        document.getElementById('share-popover').classList.remove('open');
+    }
+});
+
+function shareTwitter() {
+    var text = encodeURIComponent('Check out this Veo prompt: Interactive AR Fashion Try-On');
+    window.open('https://x.com/intent/tweet?text=' + text + '&url=' + encodeURIComponent(location.href), '_blank');
+}
+
+function copyLink() {
+    navigator.clipboard.writeText(location.href).then(function() { showToast('Link copied!'); });
+}
+
+function tryPrompt() {
+    window.open('https://aistudio.google.com/', '_blank');
+}
+</script>
+</body>
+</html>

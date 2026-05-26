@@ -1,0 +1,2927 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veo Prompt Library — Sparki</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f0fdff;
+            --bg-tertiary: #e6f7ff;
+            --text-primary: #0a0a0a;
+            --text-secondary: #404040;
+            --text-tertiary: #737373;
+            --border: #d0e8ff;
+            --border-strong: #a5d4ff;
+            --accent: #3B82F6;
+            --accent-light: #A5FFFF;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --pink: #ffc0cb;
+            --pink-light: #fff0f3;
+            --yellow-light: #fffce8;
+            --tag-bg: #e6f7ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 48px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+
+        .logo a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a.active {
+            color: var(--text-primary);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 48px 60px;
+            text-align: center;
+            border-bottom: 2px solid var(--text-primary);
+            background: linear-gradient(-45deg,
+                #e6f7ff 0%,
+                #fff0f3 20%,
+                #fff8e6 40%,
+                #f0f8ff 60%,
+                #e6f7ff 80%,
+                #fff0f3 100%
+            );
+            background-size: 300% 300%;
+            animation: gradientFlow 8s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+        }
+
+        .hero h1::before {
+            content: '';
+        }
+
+        .hero h1 span::before {
+            content: '';
+        }
+
+        #typing-title {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+            min-height: 44px;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 480px;
+            margin: 0 auto 32px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 48px;
+            gap: 48px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 360px;
+            height: 100vh;
+            background: white;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease, left 0.3s ease;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 44px;
+            background: white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            z-index: 150;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-toggle::before {
+            content: '>>';
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+        }
+
+        .sidebar.open ~ .sidebar-toggle::before {
+            content: '<<';
+        }
+
+        .sidebar.open ~ .sidebar-toggle {
+            left: 360px;
+        }
+
+        .filter-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .filter-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-content {
+            padding: 20px 24px;
+        }
+
+        .filter-section {
+            margin-bottom: 32px;
+        }
+
+        .filter-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .filter-list {
+            list-style: none;
+        }
+
+        .filter-list li {
+            margin-bottom: 8px;
+        }
+
+        .filter-list button {
+            width: 100%;
+            text-align: left;
+            padding: 10px 14px 10px 32px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s;
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .filter-list button::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--border-strong);
+        }
+
+        .filter-list button[data-category="video-generation"]::before { background: var(--accent); }
+        .filter-list button[data-category="product-photography"]::before { background: #f472b6; }
+        .filter-list button[data-category="cinematic"]::before { background: #fbbf24; border-color: #f59e0b; }
+        .filter-list button[data-category="image-generation"]::before { background: #a855f7; border-color: #9333ea; }
+        .filter-list button[data-category="character-design"]::before { background: #22c55e; border-color: #16a34a; }
+
+        .filter-list button:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-list button.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .filter-list button:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-count {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .filter-list button.active .filter-count {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .content-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .sort-select {
+            padding: 8px 32px 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        /* Prompt Grid - Masonry Layout */
+        .prompt-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* Prompt Card */
+        .prompt-card {
+            border: 1px solid #808080;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            background: white;
+            position: relative;
+        }
+
+        .prompt-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-image {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .prompt-card:hover .card-image img {
+            transform: scale(1.03);
+        }
+
+        .card-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 14px;
+            font-weight: 900;
+            padding: 6px 14px;
+            color: white;
+            transform: rotate(3deg);
+            animation: wiggle 2s ease-in-out infinite;
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 2px;
+        }
+
+        .card-badge.red { background: #ef4444; }
+        .card-badge.yellow { background: #f59e0b; color: white; }
+        .card-badge.blue { background: #3b82f6; }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(3deg); }
+            25% { transform: rotate(-3deg) scale(1.08); }
+            75% { transform: rotate(6deg); }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--text-primary);
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+
+        .card-header {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .author-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .author-handle {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .card-body {
+            padding: 12px 14px;
+        }
+
+        .prompt-category {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            color: white;
+            background: var(--accent);
+        }
+
+        .prompt-category[data-category="video-generation"] {
+            background: var(--accent);
+        }
+
+        .prompt-category[data-category="product-photography"] {
+            background: #f472b6;
+        }
+
+        .prompt-category[data-category="cinematic"] {
+            background: #fbbf24;
+            color: var(--text-primary);
+        }
+
+        .prompt-category[data-category="image-generation"] {
+            background: #a855f7;
+        }
+
+        .prompt-category[data-category="character-design"] {
+            background: #22c55e;
+        }
+
+        .prompt-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .prompt-preview {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            justify-content: flex-end;
+        }
+
+        .view-more-btn {
+            display: block;
+            width: 100%;
+            padding: 6px;
+            margin-top: 6px;
+            border: 1px solid var(--border);
+            background: white;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .view-more-btn:hover {
+            border-color: var(--border-strong);
+            color: var(--text-primary);
+        }
+
+        .card-footer {
+            padding: 10px 14px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .author-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .author-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            padding-top: 1px;
+        }
+
+        .author-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .author-divider {
+            width: 1px;
+            align-self: stretch;
+            background: var(--text-tertiary);
+            opacity: 0.3;
+            flex-shrink: 0;
+        }
+
+        .author-stats-row1 {
+            display: flex;
+            gap: 12px;
+        }
+
+        .author-stats-row2 {
+            display: flex;
+        }
+
+        .author-name {
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .author-handle {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            line-height: 1.2;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .followers-item {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-tertiary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            outline: none;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--border-strong);
+            background: var(--bg-secondary);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border: 2px solid var(--accent);
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+            color: white;
+        }
+
+        .btn-share {
+            width: 40px;
+            min-width: 40px;
+            height: 36px;
+            padding: 0;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+
+        .btn-share:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            visibility: hidden;
+            opacity: 0;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 680px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            scrollbar-gutter: stable;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .modal::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 3px;
+        }
+
+        .modal-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .modal-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-author .author-avatar {
+            width: 44px;
+            height: 44px;
+        }
+
+        .modal-author .author-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .modal-author .author-handle {
+            font-size: 13px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .modal-category {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--tag-bg);
+            border-radius: 4px;
+        }
+
+        .modal-title {
+            padding: 20px 28px 0;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .modal-section {
+            padding: 20px 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+        }
+
+        .modal-prompt-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .modal-notes {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .modal-meta {
+            display: flex;
+            gap: 24px;
+            padding: 16px 28px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .modal-meta-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-meta-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-footer {
+            padding: 20px 28px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 48px;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        footer p {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        footer a {
+            color: var(--text-tertiary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--text-primary);
+        }
+
+        footer svg {
+            transition: color 0.15s;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+                padding: 24px;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 280px;
+                height: 100vh;
+                z-index: 200;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle {
+                display: none !important;
+            }
+
+            .filter-overlay.active {
+                display: block;
+            }
+
+            nav {
+                padding: 16px 24px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 48px 24px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .stats {
+                gap: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="https://sparki.io" class="logo"><img src="https://sparki.io/_next/image?url=%2Flogo-text.svg&w=256&q=75" alt="sparki" height="24" style="vertical-align: middle;"></a>
+        <ul class="nav-links">
+            <li><a href="https://sparki.io">Try Sparki</a></li>
+            <li><a href="#" class="active">Prompt Library</a></li>
+        </ul>
+    </nav>
+
+    <div class="filter-overlay" id="filter-overlay"></div>
+
+    <header class="hero">
+        <h1><div id="typing-title"></div></h1>
+        <p>A collection of proven prompts for Google Veo, scraped from creators and organized for easy discovery.</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="hero-prompt-count">0</div>
+                <div class="stat-label">Prompts</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="hero-category-count">0</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="hero-creator-count">0</div>
+                <div class="stat-label">Creators</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <aside class="sidebar" id="filter-sidebar">
+            <div class="sidebar-content">
+            <div class="filter-section">
+                <div class="filter-title">Category</div>
+                <ul class="filter-list" id="category-filters">
+                    <li><button class="filter-btn active" data-category="all">All <span class="filter-count" id="filter-count-all">0</span></button></li>
+                    <li><button class="filter-btn" data-category="video-generation">Video Generation <span class="filter-count" id="filter-count-video-generation">0</span></button></li>
+                    <li><button class="filter-btn" data-category="product-photography">Product Photography <span class="filter-count" id="filter-count-product-photography">0</span></button></li>
+                    <li><button class="filter-btn" data-category="cinematic">Cinematic <span class="filter-count" id="filter-count-cinematic">0</span></button></li>
+                    <li><button class="filter-btn" data-category="image-generation">Image Generation <span class="filter-count" id="filter-count-image-generation">0</span></button></li>
+                    <li><button class="filter-btn" data-category="character-design">Character Design <span class="filter-count" id="filter-count-character-design">0</span></button></li>
+                </ul>
+            </div>
+            <div class="filter-section">
+                <div class="filter-title">Sort By</div>
+                <ul class="filter-list">
+                    <li><button class="active" onclick="document.querySelector('.sort-select').value='recent';handleSort()">Most Recent</button></li>
+                    <li><button onclick="document.querySelector('.sort-select').value='popular';handleSort()">Most Popular</button></li>
+                    <li><button onclick="document.querySelector('.sort-select').value='longest';handleSort()">Longest Prompt</button></li>
+                </ul>
+            </div>
+            </div>
+        </aside>
+        <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleDrawer()"></button>
+
+        <section class="content">
+            <div class="content-header">
+                <h2 class="content-title" id="content-title">All Prompts</h2>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input type="text" id="search-input" placeholder="Search prompts..." oninput="handleSearch()" style="padding: 8px 14px; border: 2px solid var(--text-primary); border-radius: 6px; font-size: 14px; width: 200px; transition: all 0.2s; outline: none;">
+                    <select class="sort-select" onchange="handleSort(this.value)">
+                        <option value="recent">Most Recent</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="longest">Longest Prompt</option>
+                    </select>
+                </div>
+            </div>
+            <div class="prompt-grid" id="prompt-grid">
+                <!-- Cards will be injected by JS -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 16px;">
+            <a href="https://x.com/Sparki_ai" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://www.youtube.com/@sparki_loves_editing/" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/sparki_ai/" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+            </a>
+            <a href="https://www.tiktok.com/@sparki_ai" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+            </a>
+            <a href="https://discord.com/invite/3cWs84Jza8" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+            </a>
+        </div>
+        <p>© 2026 Sparkview Tech Pte. Ltd. All rights reserved.</p>
+        <p>Part of <a href="https://www.sparki.io">Sparki</a> — AI Video Remix & Editing</p>
+    </footer>
+
+    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <div class="modal-author">
+                    <div class="author-avatar" id="modal-avatar"></div>
+                    <div>
+                        <div class="author-name" id="modal-author-name"></div>
+                        <div class="author-handle" id="modal-author-handle"></div>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div style="padding: 20px 28px 0;">
+                <span class="modal-category" id="modal-category"></span>
+                <h2 class="modal-title" id="modal-title"></h2>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-label">Prompt</div>
+                <div class="modal-prompt-text" id="modal-prompt-text"></div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-label">Notes</div>
+                <div class="modal-notes" id="modal-notes"></div>
+            </div>
+            <div class="modal-meta">
+                <div class="modal-meta-item">
+                    <span class="modal-meta-value" id="modal-likes"></span>
+                    <span class="modal-meta-label">Likes</span>
+                </div>
+                <div class="modal-meta-item">
+                    <span class="modal-meta-value" id="modal-retweets"></span>
+                    <span class="modal-meta-label">Retweets</span>
+                </div>
+                <div class="modal-meta-item">
+                    <span class="modal-meta-value" id="modal-replies"></span>
+                    <span class="modal-meta-label">Replies</span>
+                </div>
+                <div class="modal-meta-item">
+                    <span class="modal-meta-value" id="modal-followers"></span>
+                    <span class="modal-meta-label">Followers</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="modal-view-original" target="_blank" class="btn btn-outline">View on X</a>
+                <a href="https://sparki.io/create" target="_blank" class="btn btn-primary" onclick="navigator.clipboard.writeText(window.currentPromptText||'')">Try ⚡</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const prompts = [
+{
+    "id": 99,
+    "tweet_id": "2013635156087632025",
+    "url": "https://x.com/CharaspowerAI/status/2013635156087632025",
+    "category": "video-generation",
+    "title": "Insect Scale Cockroach Chase Scene",
+    "prompt_text": "shot: composition: locked rear chase cam millimeters above cockroach body with massive floor parallax, lens: macro ultra-wide insect lens, camera_movement: ground-hugging sprint, sudden direction snaps, ultra-low door dive. subject: description: realistic cockroach sprinting at full speed, props: slamming door gap, vibrating floor, falling shoe sole, dust clumps. scene: location: apartment hallway seen at insect scale, time_of_day: night indoor light, environment: air pressure changes, footsteps shockwaves, sweeping shadows. visual_details: action: cockroach sprints toward closing door, slides sideways, barely squeezes under door as shoe slams behind, special_effects: floor vibration ripples, dust shockwaves, motion compression zoom, hair_clothing_motion: antennae whipping violently with speed. cinematography: lighting: hard overhead light with brutal shadows, color_palette: dirty beige, shadow black, floor brown, tone: panic, survival, relentless.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 362,
+      "retweets": 47,
+      "replies": 0
+    }
+  },
+  {
+    "id": 6,
+    "tweet_id": "2053127515049251245",
+    "url": "https://x.com/YaZoraiz/status/2053127515049251245",
+    "category": "video-generation",
+    "title": "1990s Japanese Film Style Night Scene",
+    "prompt_text": "A very dark, low-exposure 1990s Japanese film-style night scene near a train station. Use dim, faded warm streetlights as the only light source, keeping the entire scene underexposed and muted. Apply heavy soft-focus blur across the entire frame, with reduced sharpness, low clarity, and a dreamy hazy atmosphere. Colors should be washed, desaturated, with deep blue-black shadows and warm yellow-green faded highlights. Add strong motion blur from the passing train, blending softly into the background with no bright areas. Enhance the texture with thick film grain, low contrast, low brightness, slight vignette, and a vintage dirty film look. Include a slender young woman with fair warm-toned skin, soft round eyes, small lips, shoulder-length slightly wavy hair with loose bangs. She wears a white short-sleeve crop top, a navy pleated mini skirt, and a dark blue backpack. She turns back toward the camera with a gentle, nostalgic expression. Camera angle is low and close behind her with shallow depth of field. Overall mood is dreamy, melancholic, romantic, and strongly influenced by 1990s Japanese film aesthetics. Avoid strong highlights and avoid any modern sharpness.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 135,
+      "retweets": 4,
+      "replies": 10
+    }
+  },
+  {
+    "id": 3,
+    "tweet_id": "2056366036417696003",
+    "url": "https://x.com/AIWithRay/status/2056366036417696003",
+    "category": "cinematic",
+    "title": "League of Legends Champion Loading Screen",
+    "prompt_text": "Cinematic League of Legends champion loading screen, ultra-realistic AAA game menu aesthetic matching official LoL client and cinematic champion reveals. Centered young woman in powerful elegant three-quarter view, confident champion pose with slight dynamic angle, looking toward camera with intense captivating expression, elegant fighter-mage vibe. \n\nSubject: Striking Douyin glam makeup with porcelain smooth radiant skin, sharp precise contouring, big sparkling doe eyes with aegyo-sal, extremely long fluffy lashes, glittery shimmery eyeshadow in vibrant rose-gold, purple and cyan, perfect arched brows, glossy plump cherry lips, heavy pink-peach blush, flawless high-end glamorous cosplay look. Exact facial topology, natural eye shape and spacing, nose structure, jawline, mouth proportions, subtle natural asymmetries, realistic skin texture with visible pores and micro-imperfections under the glam. \n\nDramatic Hextech-rune background with glowing blue, purple and gold energy particles flowing dynamically, faint Summoner's Rift architecture and ancient runes floating subtly around her. Authentic LoL loading screen UI: \"LOADING...\" progress bar at 52% with glowing segmented hextech design at bottom, champion name placeholder at top in official League of Legends font, small ability icons and stats on sides, subtle scanlines, film grain and chromatic aberration. \n\nDramatic volumetric cinematic lighting from top and side, strong cyan and gold rim light beautifully catching glitter particles, glossy lips and skin, rich cinematic color grading. 50mm lens, razor sharp focus on face and upper body, shallow depth of field, perfect composition and perspective. \n\nAnatomical perfection, material consistency, identity stability, hyper-detailed makeup and textures, masterpiece, ultra realistic, 8k",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 115,
+      "retweets": 1,
+      "replies": 24
+    }
+  },
+  {
+    "id": 94,
+    "tweet_id": "2014244788141474027",
+    "url": "https://x.com/Strength04_X/status/2014244788141474027",
+    "category": "video-generation",
+    "title": "Apocalyptic Cityscape with Calm Woman",
+    "prompt_text": "A cinematic wide rooftop shot of a beautiful woman seated at the edge of a weathered concrete ledge, viewed from behind and centered in frame, overlooking a vast city engulfed in distant fires and explosions, with burning skyscrapers glowing through thick smoke; shot on a Panavision Millennium DXL2 with a Panavision C-Series 35mm lens at aperture 1/4, creating an extremely shallow depth of field that melts the city lights into warm, abstract bokeh while keeping her silhouette and the rooftop edge subtly defined; the camera sits at seated eye level behind her with a slight downward angle, emphasizing scale, isolation, and quiet strength: lighting comes primarily from diffused orange and amber firelight wrapping the scene in haze, contrasted by a faint cool blue-gray rim light separating her figure; the color palette blends burnt orange, copper highlights, deep charcoal shadows, and desaturated blues with soft contrast, lifted blacks, gentle bloom, and fine film grain; the mood is somber, poetic, and contemplative; visible elements include cracked damp concrete reflecting firelight, drifting smoke and embers, glowing windows, and faint traffic trails below; a beautiful moment of stillness against an apocalyptic cityscape.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 117,
+      "retweets": 4,
+      "replies": 22
+    }
+  },
+  {
+    "id": 9,
+    "tweet_id": "2049526989955207426",
+    "url": "https://x.com/jasminekhan90_/status/2049526989955207426",
+    "category": "video-generation",
+    "title": "Hidden Tree Civilization",
+    "prompt_text": "10s cinematic sequence Camera Style: 35mm lens, shallow depth of field, smooth cinematic aerial glide with gentle parallax motion Lighting: soft golden morning sunlight filtering through canopy, warm natural highlights with light god rays Environment: dense ancient forest where massive trees form a living community with interconnected branches, natural platforms, vines, and hollow trunks Scene & Motion Direction: 0–2s: Wide aerial establishing shot above towering forest canopy. Massive trees extend upward, their branches interconnected like a natural city. Soft wind moves through leaves, creating a calm rhythmic motion. Camera slowly descends. 2–4s: Mid shot entering tree community. Hollow tree trunks act as homes, glowing softly from within. Small natural bridges made of vines connect different trees. Creatures/forest beings move gently between platforms carrying food made of fruits, seeds, and water collected from leaves. 4–6s: Tracking shot through a central tree hub. Community life visible: eating around carved wooden platforms, sharing food, children-like forest beings playing on hanging vines, lightly swinging and moving with natural balance. 6–8s: Camera passes a large open canopy area where water droplets fall in controlled streams from leaves into natural pools. Beings gather calmly, interacting with water and food, movement slow and harmonious. 8–10s: Final wide pullback shot showing entire tree civilization interconnected across forest canopy. Soft light rays pass through leaves, birds move between branches, community continues peaceful daily life. Ending Action: Camera holds on serene living forest city as wind gently moves through leaves and branches. Key Realism Notes: All structures fully natural and organic, no artificial architecture, gravity-consistent movement on vines and branches, soft environmental physics, calm cooperative behavior, no exaggerated fantasy motion.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 169,
+      "retweets": 8,
+      "replies": 7
+    }
+  },
+  {
+    "id": 80,
+    "tweet_id": "2017053959891104044",
+    "url": "https://x.com/Strength04_X/status/2017053959891104044",
+    "category": "video-generation",
+    "title": "Hamster Deadlifting in Gym",
+    "prompt_text": "Ultra-realistic cinematic gym scene featuring a small tan-and-white hamster wearing a beige baseball cap, silver over-ear headphones, and a white lifting belt.\nScene opens with the barbell resting fully on the ground on a worn wooden lifting platform. The hamster is in a proper deadlift stance — feet planted wide, paws gripping the bar, back straight, head slightly lifted forward.\n0–4 seconds:\nSlow, dramatic buildup. The hamster struggles to initiate the lift — muscles tense, fur slightly trembling, paws tightening on the bar. Subtle body shake, controlled strain, deep focus. No camera shake. No text. No flashy effects.\n4–8 seconds:\nThe hamster successfully deadlifts the barbell in one smooth, powerful motion, lifting it from the floor to full standing lockout. Chest up, shoulders back, bar held firmly at hip level. The effort turns into quiet triumph.\nCinematic low front angle throughout to exaggerate scale and power.\nShallow depth of field with a modern gym environment softly blurred in the background.\nCool neutral gym lighting with realistic reflections on metal plates and soft shadows on the floor.\nStyle:\nHyper-realistic, premium movie realism, high contrast, clean motion, no distortion, no surreal physics, no bar intersecting the body, no camera jumps, no visual noise.\nEmotional tone: determination → victory.\nFeels like a motivational sports movie",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 156,
+      "retweets": 7,
+      "replies": 47
+    }
+  },
+  {
+    "id": 91,
+    "tweet_id": "2014722408868151339",
+    "url": "https://x.com/Strength04_X/status/2014722408868151339",
+    "category": "product-photography",
+    "title": "Surreal Pringles Parachute over Paris",
+    "prompt_text": "Surreal cinematic advertising photograph of a Pringles cheese flavor can floating in the sky like a parachute, suspended by thin strings attached to two large curved potato chips acting as wings. The Pringles can hangs mid-air above Paris, with the Eiffel Tower clearly visible in the background near a calm river and cityscape. Bright golden-hour sunlight, clear blue sky, soft warm highlights, and realistic shadows. Hyper-realistic textures on the chips with visible seasoning and crumbs, crisp branding on the can, playful yet premium commercial concept. Wide-angle perspective, shallow depth of field, sharp subject focus, whimsical advertising aesthetic, ultra-clean composition, cinematic realism, high detail, 8K quality, no text overlay, no watermark.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 109,
+      "retweets": 10,
+      "replies": 15
+    }
+  },
+  {
+    "id": 114,
+    "tweet_id": "2002604114250011007",
+    "url": "https://x.com/ai_for_success/status/2002604114250011007",
+    "category": "video-generation",
+    "title": "FPV Flight Through Christmas Village",
+    "prompt_text": "Extremely fast paced cinematic FPV flying through the outer edges of a dense Christmas village at night, weaving between dark pine trees and snow packed roads, cutting low between wooden houses, sharp dives past rooftops lined with icicles, aggressive turns through narrow streets, glowing windows and subtle festive details, heavy snow in the air, cold blue shadows mixed with warm interior light, smoke drifting from chimneys, frozen cobblestone streets and abandoned carts, then accelerating toward the village center, breaking into an open town square with a massive illuminated Christmas tree at the heart of the city, ornaments glowing softly, lights wrapping the branches, snow swirling in the open space, smooth cinematic orbit and circular FPV pass around the tree, controlled speed, stable rotation, perfect symmetry, ultra realistic lighting, natural snowfall and mist, cinematic depth of field, high contrast color grading, realistic winter textures, immersive motion, smooth camera stabilization, and a grounded cinematic winter atmosphere",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 92,
+      "retweets": 7,
+      "replies": 12
+    }
+  },
+  {
+    "id": 24,
+    "tweet_id": "2038934554535395595",
+    "url": "https://x.com/MrDasOnX/status/2038934554535395595",
+    "category": "video-generation",
+    "title": "Cinematic Stormy Shower Selfie",
+    "prompt_text": "A cinematic mirror selfie of a fit young man standing under a rainfall shower in a dark, modern bathroom, shirtless, wearing black Nike athletic shorts. Heavy water pours from above, streaming down his defined abs, chest, shoulders, and arms, creating a glossy, wet skin texture with ultra-realistic detail.\n\nA sudden lightning flash from outside a nearby window illuminates the entire scene for a split second, casting sharp, high-contrast highlights across his physique while leaving deep, dramatic shadows in between flashes. The lighting alternates between near darkness and intense white-blue illumination, creating a powerful storm atmosphere.\n\nHe stands slightly turned to the side, one hand gripping the wet tiled wall while the other hand holds the phone, subtly flexing his bicep and core. His messy medium-length dark hair is fully soaked, strands sticking to his forehead and partially covering his eyes, giving a dark, intense, and brooding expression.\n\nRainfall sound implied through heavy water streams, with visible droplets frozen mid-air during the lightning flash. Steam and mist fill the room, with water droplets on the mirror adding depth and realism. The background features dark tiles, blurred glass, and faint reflections of the storm outside.\n\nVolumetric lighting enhanced by lightning bursts, ultra-detailed water physics, shallow depth of field, editorial fitness photography style, hyper-realistic skin texture, 4K resolution, dramatic cinematic color grading with cool blue storm tones. Face 100% same as reference photo.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 76,
+      "retweets": 9,
+      "replies": 17
+    }
+  },
+  {
+    "id": 47,
+    "tweet_id": "2026536660343652562",
+    "url": "https://x.com/ZaraIrahh/status/2026536660343652562",
+    "category": "video-generation",
+    "title": "Muscle Car City Drift at Dusk",
+    "prompt_text": "No subtitles. No captions. No music.\nSHOT — Low front-mounted camera on a muscle car racing through narrow city streets at dusk; initial framing is tight and close to the front grill; at 3 seconds, sharp drifting around a corner causing camera shake.\nSUBJECT — Muscle car: classic yet aggressive build with glossy dark paint reflecting city lights; tires producing smoke and sparks as they scrape against surfaces.\nSCENE — Urban downtown setting with tight alleyways and sharp corners; dusk with fading natural light and emerging neon/plasma urban lighting; ambient haze from smoke and dust.\nVISUAL DETAILS — Tire smoke billowing prominently filling parts of the frame; sparks flying as car scrapes building walls; reflections of flickering police lights on wet pavement; slight motion blur emphasizing speed and drifting physics.\nACTION AND CAMERA MOTION — 1) Camera shakily follows engine torque during sharp drift at 3 seconds, immersing viewer in vehicle dynamics; 2) Quick cut to lateral side-tracking shot capturing sparks and close proximity to wall, emphasizing danger; 3) Rapid snap back to forward-facing chase perspective highlighting pursuit urgency.\nCINEMATOGRAPHY — Natural dusk lighting supplemented by urban neon reflections; harsh spotlighting from police car lights creating flashing red and blue patterns; dynamic motion blur for intensity; high contrast to accentuate tire smoke and sparks.\nAUDIO — Voice: None direct; Language: N/A; Tone: Tense, urgent.\nDialogue: Muffled police radio chatter.\nPrimary sounds: Low roaring engine revs; squealing tire screeches; sporadic sparks hitting surfaces.\nAmbient: Helicopter blades overhead cutting through city noise.\nEnvironmental: Urban street ambiance with echoing engine and police sirens.\nSTYLE — Visual aesthetic: Modern action realism with gritty urban textures and cinematic lighting; Quality: Ultra HD 4K; Prohibited elements: subtitles, captions, text overlays, lower thirds, any on-screen text.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 67,
+      "retweets": 6,
+      "replies": 37
+    }
+  },
+  {
+    "id": 98,
+    "tweet_id": "2013822612536000607",
+    "url": "https://x.com/Strength04_X/status/2013822612536000607",
+    "category": "video-generation",
+    "title": "Red Guava Soda Product Explosion",
+    "prompt_text": "A high-impact product explosion video featuring a red guava soda can centered in frame against a solid red studio background.\n\nSCENE 1 — STILLNESS (0–3 seconds):\nThe soda can stands perfectly upright and completely still at the center of the frame. No liquid, no fruit, no motion. The can appears sealed, intact, and realistic with light condensation droplets. The background is clean and uniform red. Lighting is steady and neutral. No particles, no splashes, no anticipation effects. Absolute stillness is maintained for a full 3 seconds.\n\nSCENE 2 — IMPACT BURST (instant after 3 seconds):\nA violent guava splash erupts from behind the can at extreme speed. The splash is aggressive, sudden, and forceful — not cinematic, not slow motion. Thick red guava liquid explodes forward and upward, slamming into the back of the can and visibly shaking it.\n\nWhole guavas, guava slices, and green leaves are launched outward with raw momentum, bursting through the empty space around the can. Liquid sheets tear through the air, creating sharp splashes, chaotic arcs, and dense droplets. The motion is fast, loud, and explosive.\n\nThe can remains mostly upright but reacts physically — shaking, vibrating, and slightly shifting from the impact. Fruit pieces and liquid fragments fill the frame by falling, colliding, and splashing around the can, occupying all previously empty space.\n\nNo elegance, no slow motion, no cinematic pacing. The burst feels uncontrolled, pressurized, and powerful. Lighting intensifies during the impact to emphasize liquid thickness, fruit texture, and high-speed motion. Final frames show suspended droplets, falling fruit, and liquid wrapping around the can in chaotic aftermath.\n\nUltra-realistic physics, extreme speed, aggressive energy, commercial-grade realism, bold contrast, explosive motion — no cinematic softness.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 216,
+      "retweets": 18,
+      "replies": 35
+    }
+  },
+  {
+    "id": 4,
+    "tweet_id": "2057111892330717611",
+    "url": "https://x.com/Just_sharon7/status/2057111892330717611",
+    "category": "video-generation",
+    "title": "Paparazzi Red Carpet Scene",
+    "prompt_text": "Ultra-realistic cinematic vertical video (9:16), authentic paparazzi/fan-captured red carpet moment at a luxury nighttime gala. Handheld iPhone-style footage with slight camera shake, autofocus breathing, flash bloom, natural crowd audio, candid celebrity realism.\n\nA glamorous celebrity actress with striking icy blue eyes and dark brown hair in a messy elegant updo wears a sleek black couture evening gown with subtle shimmer and diamond earrings. A bald bearded security guard in a black suit stays protectively beside her while fans crowd behind silver barriers holding phones and glossy autograph photos.\n\n0–3s: She walks down the red carpet toward screaming fans while paparazzi flashes explode everywhere. The handheld camera pushes through the crowd trying to capture her face.\nGirl behind camera says excitedly: “Oh my god, she’s actually coming over here… look at her!”\n3–5s: Tight close-up as she signs glossy photos with a black Sharpie. She looks down focused, then briefly glances up with a soft smile toward the camera.\nGirl behind camera whispers nervously: “She’s so beautiful in real life…”\n\n5–7s: The celebrity turns gracefully and walks toward a grand staircase with glowing red steps and bright overhead lights. Her gown moves naturally while security guides people back.\nGirl behind camera says: “Wait, wait—she turned around!”\n7–9s: She suddenly turns back toward the camera at the staircase and strikes an iconic pose with one hand on her hip, making direct eye contact with a poised slightly parted-lip expression while flashes burst around her.\nGirl behind camera gasps softly: “That pose… wow.”\n\nStyle: raw paparazzi realism, Cannes Film Festival aesthetic, authentic fan-camera footage, luxury Hollywood premiere atmosphere, Vogue editorial energy, cinematic lighting, shallow depth of field, realistic skin texture, elegant celebrity mystique.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 618,
+      "retweets": 27,
+      "replies": 60
+    }
+  },
+  {
+    "id": 41,
+    "tweet_id": "2028593828530176252",
+    "url": "https://x.com/HBCoop_/status/2028593828530176252",
+    "category": "video-generation",
+    "title": "Rain-drenched Tokyo Cyberpunk Street",
+    "prompt_text": "Low-angle cinematic tracking shot moving slowly along a rain-drenched Tokyo side street at night. Camera hovers just above the wet asphalt, catching neon reflections streaking across puddles in cyan, magenta, and red. Steam billows from a street vent in the foreground, drifting across frame. The focal point is a corner ramen shop with a glowing red neon sign reading 'NOODLE KINGDOM' and Japanese kanji below it, with a smaller 'OPEN 24 HRS' sign in the window. Inside the shop, warm yellow light illuminates patrons hunched over steaming bowls. Rain falls steadily, visible as fine streaks against the neon glow. Pedestrians pass with translucent umbrellas, their silhouettes backlit by competing signage lining the narrow street. Camera slowly racks focus from the steam in the foreground to the shopfront, then pulls to a wider frame revealing the dense vertical signage of the surrounding buildings disappearing into fog. Photorealistic, anamorphic lens, heavy atmosphere, cyberpunk color palette with teal shadows and warm practicals. Sound design: steady rain, steam from street vents",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 50,
+      "retweets": 1,
+      "replies": 6
+    }
+  },
+  {
+    "id": 74,
+    "tweet_id": "2018027103736770675",
+    "url": "https://x.com/Xmira_belle/status/2018027103736770675",
+    "category": "cinematic",
+    "title": "Sultry Woman in Red Dress in Luxury Car",
+    "prompt_text": "A young woman with shoulder-length, curly red hair and bangs. She has fair skin with light freckles, winged eyeliner, and a septum piercing. Her expression is sultry, with her index finger resting gently on her lower lip. She is wearing a tight, long-sleeved red mini dress and sheer black pantyhose. She is seated in the back of a car with her legs crossed and pulled up towards her chest, displaying bare feet in sheer hose. Interior of a luxury car, specifically the back seat. Light grey leather seats with diamond stitching patterns visible on the side door panel. A 'B' logo (likely Bugatti) is embroidered on the headrest. Through the car window, a night cityscape is visible with blurred city lights, street lamps, and streaks of light from moving traffic on a highway. Direct flash photography illuminating the subject against a darker background. 4K HD quality, highly detailed textures on the hair, skin, and leather seats. Candid, urban night aesthetic, realistic photo.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 287,
+      "retweets": 45,
+      "replies": 70
+    }
+  },
+  {
+    "id": 108,
+    "tweet_id": "2010666164129849800",
+    "url": "https://x.com/Strength04_X/status/2010666164129849800",
+    "category": "video-generation",
+    "title": "Underwater Snorkeling Portrait",
+    "prompt_text": "Subject: Person in the image\n\nCreate a hyper-realistic underwater close-range portrait captured with a wide-angle action camera in a waterproof housing. The camera is very close to the Subject (≈0.5–1 m), positioned slightly below face level and angled upward, with wide-angle distortion emphasizing depth while keeping the Subject dominant.\n\nMid-shot to ¾ body framing. The Subject fills most of the frame, with face and upper body clearly visible. Schools of tropical fish swim closely around, some passing near the lens to create layered depth, with mild motion blur on fish closest to the camera.\n\nNatural sunlight enters from above, producing bright caustic patterns on the Subject and surrounding water, strong highlights near the surface, and soft blue gradients below. Floating water particles are visible between the camera and Subject, with slight refraction distortion around mask edges and hands.\n\nThe Subject appears calm and relaxed, floating effortlessly with subtle body movement suggesting buoyancy and breathing through the snorkel.\n\nA shallow coral reef is visible below, slightly softened by depth, while nearby fish remain sharper. The water surface shimmers above with gentle ripples.\n\nColor behavior reflects natural underwater absorption: dominant blues and aquas, vibrant yellow and black fish patterns retained, and skin tones realistic with a slightly cool cast.\n\nThe image should feel like a real close-distance snorkeling travel photo intimate, immersive, and authentic.\n\nDo not alter facial structure or identity. The Subject must remain 1000% identical to the reference image.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 170,
+      "retweets": 15,
+      "replies": 28
+    }
+  },
+  {
+    "id": 104,
+    "tweet_id": "2012828032235717015",
+    "url": "https://x.com/linxiaobei888/status/2012828032235717015",
+    "category": "video-generation",
+    "title": "卧室改造延时摄影",
+    "prompt_text": "房间改造延时摄影，室内设计大变身，改造前和改造后，清洁和布置家具，照片级真实的家居改造，静态相机机位。从废墟到避风港：卧室改造延时摄影。一个废弃、破败的正方形房间，墙壁上覆盖着剥落的油漆、污垢和绿霉，地面是裸露的混凝土，散落着碎片。快进延时动作，如幽灵般模糊的人影快速移动，铲除墙皮，将房间刷成亮白色，并逐条安装浅色橡木地板，家具被搬入并快速组装。房间现在是一个崭新、舒适的现代卧室，配有一张铺着米色寝具的大床、一个中世纪风格床头柜、两幅裱框艺术画以及窗边的一把阅读椅。阳光射入室内，投下温暖的阴影。静态广角镜头（固定机位），从角落视角拍摄整个房间以强调变化。从阴冷、平淡的环境光开始，过渡到明亮、温暖的自然光混合柔和的室内吊灯光晕。照片级真实感，4K，高清，纹理细节丰富，室内设计纪录片风格。",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 115,
+      "retweets": 19,
+      "replies": 5
+    }
+  },
+  {
+    "id": 71,
+    "tweet_id": "2018904944464834762",
+    "url": "https://x.com/Cicily_aura/status/2018904944464834762",
+    "category": "cinematic",
+    "title": "Dua Lipa in Black Dress on Rooftop",
+    "prompt_text": "style: ultra-photorealistic, cinematic, high-fashion editorial. subject: Dua Lipa, female, mid 20s, sharp jawline, defined cheekbones, full lips, confident gaze, smooth, warm olive skin tone, flawless texture, natural glow, deep brunette sleek, long hair with soft waves, middle-parted, slightly flowing as if caught by a gentle breeze, smoky eyes, winged eyeliner, glossy nude lips, subtle contouring. clothing: form-fitting black satin mini dress, thin spaghetti straps, low neckline, high slit on one side, luxurious satin with soft light reflections, elegant yet sexy, modern pop-star fashion. pose: standing with one hip slightly pushed out, one hand resting on hip, the other gently touching hair, confident, sultry, composed, direct eye contact with camera. environment: modern luxury rooftop at night, city skyline with blurred skyscraper lights, glass railings, urban, glamorous, exclusive. lighting: cinematic studio lighting mixed with ambient city glow, soft but directional light illuminating face and upper body, subtle fill to maintain skin detail, soft rim light outlining hair and shoulders, moody, seductive, high-end editorial. camera: full-frame DSLR, 85mm prime lens, f/1.8, 1/125, iso 100, sharp focus on face and eyes, shallow depth of field, slightly low angle to enhance confidence and presence, vertical portrait, 9:16 aspect ratio. image_quality: 8K, extreme detail, visible skin texture, realistic fabric folds, cinematic contrast with warm highlights and cool shadows, hyper-realistic, magazine-cover quality. overall_mood: sexy, confident, powerful, modern pop icon energy",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 162,
+      "retweets": 61,
+      "replies": 87
+    }
+  },
+  {
+    "id": 32,
+    "tweet_id": "2032767421103354298",
+    "url": "https://x.com/Sheldon056/status/2032767421103354298",
+    "category": "video-generation",
+    "title": "Peaceful Japanese Village Bicycle Ride",
+    "prompt_text": "A calm cinematic forward tracking shot moving gently down a long stone pathway in a peaceful hillside Japanese village. Traditional wooden houses with tiled roofs line both sides of the path, small gardens filled with colorful flowers swaying softly in the breeze, laundry moving lightly on wooden balconies.\n\nA young man rides a bicycle slowly downhill along the stone path toward the valley below. He pedals calmly through the quiet village, passing wooden fences, blooming plants, and sunlit houses. His movement feels natural and unhurried as the bicycle rolls smoothly along the path.\n\nMassive fluffy cumulus clouds drift across a deep blue summer sky above the valley. Warm golden sunlight illuminates the houses and hillsides, casting soft natural shadows across the pathway.\n\nLeaves rustle gently in the wind, distant birds chirp, and the peaceful village atmosphere feels calm and timeless.\n\nStudio Ghibli–inspired atmosphere, painterly textures, natural color grading, cinematic composition, shallow depth of field, subtle camera movement, soft film grain, 4K, 24fps, tranquil mood.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 51,
+      "retweets": 1,
+      "replies": 24
+    }
+  },
+  {
+    "id": 38,
+    "tweet_id": "2029019321364824452",
+    "url": "https://x.com/ChillaiKalan__/status/2029019321364824452",
+    "category": "video-generation",
+    "title": "Premium Skincare Commercial Assembling Sequence",
+    "prompt_text": "Use the uploaded image as the exact visual reference for jar design, label, strawberries, raspberries, flowers, leaves, condensation droplets, red gradient background, and reflective surface.\n\nCamera:\nLocked front-facing camera.\nNo zoom.\nNo rotation.\nNo angle change.\nStudio composition remains centered.\n\nStyle:\nPremium beauty commercial.\nSmooth assembling sequence.\nUltra realistic.\nSlow motion but not dramatic.\n\nScene – Start (Empty Setup):\nStart with an empty red gradient background and glossy reflective surface.\nNo jar.\nNo fruits.\nNo flowers.\nNo water droplets.\n\nAssembling Sequence:\n\n1. The glass jar base smoothly slides into frame from below and settles perfectly centered.\n2. The lid gently lowers from above and aligns perfectly on the jar.\n3. Condensation droplets subtly appear on the glass surface as if forming naturally.\n4. Raspberries roll in softly from left and right, stopping naturally around the base.\n5. Strawberry halves slide into position at the front.\n6. Whole strawberries gently drop from above into the open jar top and settle naturally.\n7. Small white flowers softly fall into place between the strawberries.\n8. Green leaves slide in behind the jar to frame it.\n9. Final micro water droplets appear on fruits for freshness effect.\n\nAll movements smooth and controlled.\nNo bouncing.\nNo exaggerated motion.\nNo dramatic lighting changes.\n\nLighting:\nKeep original studio lighting.\nDeep red background glow remains consistent.\nSoft reflections on the glossy surface.\n\nSound (if supported):\nSoft subtle assembling sound design.\nGentle fruit placement sounds.\nLight glass contact sound.\nNo music or very subtle premium ambient tone.\n\nEnd Frame:\nFully assembled composition exactly matching the reference image.\nEverything perfectly arranged.\nHold for 1–2 seconds.\nUltra clean luxury skincare commercial finish.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 595,
+      "retweets": 64,
+      "replies": 23
+    }
+  },
+  {
+    "id": 88,
+    "tweet_id": "2015675184347599007",
+    "url": "https://x.com/AIwithSynthia/status/2015675184347599007",
+    "category": "video-generation",
+    "title": "Wireless Earbud Assembly",
+    "prompt_text": "base_style: \"macro cinematic, ultra-clean, photorealistic\" aspect_ratio: \"16:9\" scene_description: \"Minimal white surface with soft studio lighting.\" camera_setup: \"Locked macro shot, clinical precision.\" key_elements:   - \"Wireless earbud internal components\"  timeline:   - sequence: 1     timestamp: \"00:00-00:02\"     action: \"Speaker driver, battery, and shell parts aligned.\"     audio: \"Soft digital ambience.\"    - sequence: 2     timestamp: \"00:02-00:06\"     action: \"Components assemble into a seamless earbud.\"     audio: \"Clean magnetic snaps, subtle tech ASMR.\"    - sequence: 3     timestamp: \"00:06-00:08\"     action: \"LED indicator lights up briefly.\"     audio: \"Soft electronic chime.\"",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 76,
+      "retweets": 20,
+      "replies": 66
+    }
+  },
+  {
+    "id": 52,
+    "tweet_id": "2023283670547648729",
+    "url": "https://x.com/Strength04_X/status/2023283670547648729",
+    "category": "product-photography",
+    "title": "Chilled Yellow Soda Can Product Photography",
+    "prompt_text": "Ultra-realistic high speed beverage product photography on a seamless solid warm yellow background and matching reflective liquid surface. Center frame a chilled matte yellow aluminum soda can standing upright in the middle of a shallow pool of yellow colored liquid, the can covered with fine condensation droplets and realistic metallic texture, large elegant black flowing script typography across the front with smaller clean text beneath and a small red circular seal near the bottom",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 109,
+      "retweets": 31,
+      "replies": 16
+    }
+  },
+  {
+    "id": 44,
+    "tweet_id": "2027984732882145330",
+    "url": "https://x.com/Strength04_X/status/2027984732882145330",
+    "category": "video-generation",
+    "title": "Hyper-realistic Edible Product Cake",
+    "prompt_text": "Nano Banana 2 :- Hyper realistic edible version of uploaded product,preserve exact original shape, proportions and silhouette, product fully intact and uncut, surface transformed into soft matte mousse texture, natural sponge-like edible detailing, no glossy or shiny finish, subtle velvet spray coating, straight front view, eye-level camera angle, camera positioned directly in front of the product, centered symmetrical composition, natural soft daylight coming from a nearby window, realistic gentle shadows, placed on a wooden or beige marble table, soft neutral linen fabric background, bright natural lighting, not overexposed, shallow depth of field, macro lens photography, premium yet natural dessert styling, hand holding a simple spoon close to the surface but not cutting, ultra realistic, 8k high detailfinal image in 3:4.\n\nVeo 3.1 :- Turn the uploaded product into a hyper realistic edible cake, preserve exact shape and front view. Soft matte mousse texture, no gloss.Natural daylight setting.A spoon gently cuts one edge, surface breaks softly, inside reveals layered sponge cake and cream.Slow smooth motion, macro lens, ultra realistic.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 133,
+      "retweets": 29,
+      "replies": 27
+    }
+  },
+  {
+    "id": 65,
+    "tweet_id": "2018906127686066449",
+    "url": "https://x.com/YaseenK7212/status/2018906127686066449",
+    "category": "product-photography",
+    "title": "Exploded View of Scarlett Drip Coffee Maker",
+    "prompt_text": "A photorealistic premium exploded view visualization of a Scarlett drip coffee maker. The coffee machine, featuring a black plastic body with metal accents, is completely disassembled with all components floating in mid-air, arranged in a strict vertical composition along a central axis Floating Components (Top to Bottom) Render Style & Camera: Photorealistic 3D render, high-end appliance advertising photography level (Octane / Cinema 4D style), PBR materials, extremely high detail on plastic, glass, and metal textures. Frontal view with a slight downward tilt. Vertical aspect ratio (9:16). The object occupies approximately 70% of the frame. The mood conveys premium quality, cleanliness, engineering precision, and the concept of \"seeing how coffee works Render Style & Camera: Photorealistic 3D render, high-end appliance advertising photography level (Octane / Cinema 4D style), PBR materials, extremely high detail on plastic, glass, and metal textures. Frontal view with a slight downward tilt. Vertical aspect ratio (9:16). The object occupies approximately 70% of the frame. The mood conveys premium quality, cleanliness, engineering precision, and the concept of \"seeing how coffee works.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 162,
+      "retweets": 33,
+      "replies": 45
+    }
+  },
+  {
+    "id": 50,
+    "tweet_id": "2024532744672596420",
+    "url": "https://x.com/oggii_0/status/2024532744672596420",
+    "category": "video-generation",
+    "title": "First-Person GoPro POV Skiing Video",
+    "prompt_text": "Real-time speed. Ultra-realistic first-person GoPro POV video based strictly on the provided reference image. The skier is descending a steep alpine slope at natural human skiing speed — fast, controlled, and physically accurate. Skis are visible at the bottom of the frame, carving through deep powder snow as snow sprays outward and flows naturally around them. Large volumes of loose snow are moving downhill in the surrounding terrain, creating dynamic snow flow and atmospheric intensity. Snow cascades along the slope behind and to the sides, but the skier remains ahead of the moving snow with clear forward visibility. Motion feels grounded and physics-based: realistic acceleration, gravity-driven descent, terrain feedback, and snow resistance. No exaggerated speed or unnatural motion. Camera movement is natural and reactive to terrain variations — subtle shake from uneven snow and carving turns. Snow particles and powder occasionally pass the lens. Strong forward motion with slight edge motion blur and sharp center focus for realism. Cold overcast mountain lighting, muted tones, diffused visibility from airborne powder. Sound design: wind pressure, skis cutting through snow, distant snow movement, natural mountain ambience. No music. Cinematic but grounded realism, extreme sports documentary style.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 68,
+      "retweets": 9,
+      "replies": 9
+    }
+  },
+  {
+    "id": 31,
+    "tweet_id": "2032790337073328459",
+    "url": "https://x.com/Strength04_X/status/2032790337073328459",
+    "category": "video-generation",
+    "title": "Luxury Blueberry Yogurt Splash Commercial",
+    "prompt_text": "Ultra-realistic cinematic yogurt advertisement showing a premium blueberry yogurt cup labeled “Berry Cream” bursting from a creamy yogurt splash. Fresh blueberries, milk droplets, and glossy cream waves surround the cup. A modern smartphone behind shows a breakfast social feed. Soft purple-blue gradient background, bright studio lights, high-speed liquid motion, luxury dairy commercial, 8K resolution.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 59,
+      "retweets": 7,
+      "replies": 18
+    }
+  },
+  {
+    "id": 93,
+    "tweet_id": "2014269325717262670",
+    "url": "https://x.com/LudovicCreator/status/2014269325717262670",
+    "category": "video-generation",
+    "title": "Sleek Espresso Machine Close-up",
+    "prompt_text": "Sleek black espresso machine on marble counter, steam curls from cup; a second shot pours crema in slow motion, forming latte art. Slow dolly-in close-up that ends with a soft pull-focus to the logo, minimalist luxury style, soft diffused daylight.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 118,
+      "retweets": 21,
+      "replies": 10
+    }
+  },
+  {
+    "id": 124,
+    "tweet_id": "1996512318214041896",
+    "url": "https://x.com/LudovicCreator/status/1996512318214041896",
+    "category": "video-generation",
+    "title": "Empty Motel Parking Lot at Night",
+    "prompt_text": "Wide static shot, empty motel parking lot at night, only a single light flickers as fog drifts through, distant train horn and static hum break the silence, cool desaturated lighting, suspenseful mystery cinematic realism style.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 134,
+      "retweets": 11,
+      "replies": 8
+    }
+  },
+  {
+    "id": 96,
+    "tweet_id": "2013938960339464319",
+    "url": "https://x.com/Strength04_X/status/2013938960339464319",
+    "category": "product-photography",
+    "title": "Ultra-realistic Strawberry and Milk Tornado",
+    "prompt_text": "Create an imageUltra-realistic high-speed studio food photography of a vertical tornado-like composition made from fresh ripe strawberries and sliced strawberry halves, spiraling upward in mid-air, tightly wrapped and intersected by thick, glossy ribbons of white milk splashing dynamically around the fruit. Individual strawberry pieces and droplets are frozen in motion, bursting outward with fine milk splatter particles suspended crisply against a deep solid black background. The strawberries appear vibrant red with visible seeds, moist surface texture, and natural highlights, while the milk has a creamy, smooth viscosity with sharp edges and fluid motion trails. Shot with a macro-style lens from a straight-on perspective, slightly low angle to enhance height and drama, extreme clarity and sharp focus throughout the central subject with minimal depth falloff. Dramatic high-contrast studio lighting with strong directional key light and subtle rim lighting accentuates texture, contours, and splash detail, creating luminous highlights and deep shadows. The overall mood is energetic, indulgent, and cinematic, with premium commercial advertising quality, hyper-photorealistic realism, ultra-detailed, frozen action, luxury food photography aesthetic, 8K resolution, ultra-sharp, high-speed flash capture.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 217,
+      "retweets": 18,
+      "replies": 40
+    }
+  },
+  {
+    "id": 25,
+    "tweet_id": "2038224276835471420",
+    "url": "https://x.com/Strength04_X/status/2038224276835471420",
+    "category": "product-photography",
+    "title": "Rugged Chronograph Watch in Alpine Rocks",
+    "prompt_text": "A rugged, matte-black chronograph watch with bold orange accents is tightly framed between two textured rock formations, creating a natural vignette that directs all focus toward the dial; the scene opens with an ultra-close macro perspective, the camera slowly sliding laterally through the narrow rocky gap, maintaining an intimate, compressed field of view with no zoom-out, as if discovering the watch hidden within a harsh alpine environment. Cold mountain air subtly moves fine dust particles and faint mist across the frame, catching soft, diffused daylight that spills in from above, while a warm, low-angle sunlight grazes the rocks and reflects gently onto the watch face, creating a striking contrast between cool shadows and warm highlights. The camera continues a controlled micro-orbit around the watch at close range, allowing specular highlights to travel across the brushed metal bezel, engraved screws, and slightly textured rubber strap, emphasizing durability and premium craftsmanship. The orange indices and hands glow subtly as light shifts across the sapphire crystal, revealing crisp reflections and slight curvature distortions. In the blurred background, towering mountain peaks remain softly out of focus, adding depth without distraction, while tiny vibrations in the environment cause minuscule pebble shifts near the base, reinforcing realism. As the shot progresses, a faint breeze brushes across the strap, introducing barely perceptible movement, while light intensity fluctuates naturally as if clouds are passing overhead. The sequence ends in a locked, ultra-tight hero composition, perfectly centered within the rock frame, with high contrast, razor-sharp detail on the dial, and a cinematic interplay of shadow, texture, and controlled highlights that reinforce a premium, adventure-driven identity.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 106,
+      "retweets": 6,
+      "replies": 26
+    }
+  },
+  {
+    "id": 35,
+    "tweet_id": "2030986646200656016",
+    "url": "https://x.com/Strength04_X/status/2030986646200656016",
+    "category": "product-photography",
+    "title": "Luxury Strawberry Skincare Product Photography",
+    "prompt_text": "Ultra-realistic luxury skincare product photography featuring a glass cosmetic jar labeled “ONE POSE” placed at the center of a glossy reflective surface. The jar contains a vibrant strawberry-pink cream with a soft gradient fading into a frosted white lid, and a smooth swirl of creamy pink product melting over the top and dripping down the sides of the jar like glossy dessert glaze. Surrounding the product are fresh ripe strawberries and halved strawberries with visible seeds and juicy texture, arranged naturally around the base. Soft scoops of strawberry ice cream sit beside the fruit, slightly melting and blending into a glossy pink cream puddle that spreads across the surface. The background is a soft pastel pink studio gradient that enhances the strawberry tones. Premium studio lighting from above and the side creates crisp reflections on the glass jar, soft highlights on the melting cream and ice cream texture, and gentle shadows beneath the product. The composition feels indulgent and dessert-inspired while maintaining a clean luxury cosmetic advertising aesthetic, hyper-realistic textures, shallow depth of field, cinematic lighting, ultra-detailed 8K product photography.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 68,
+      "retweets": 7,
+      "replies": 19
+    }
+  },
+  {
+    "id": 42,
+    "tweet_id": "2028125035433714003",
+    "url": "https://x.com/oggii_0/status/2028125035433714003",
+    "category": "product-photography",
+    "title": "Luxury Bath Gel Product Photography",
+    "prompt_text": "Luxury product photography of a green translucent bath and shower gel bottle held gently by two feminine hands submerged in calm water. The bottle is centered, glossy, with water droplets on the surface, silver metallic cap, elegant minimal label design. The water is deep teal-green with soft mist swirling across the surface. White lotus flowers and large green lily pads float around the hands. The hands wear delicate thin gold rings. Soft, diffused natural lighting, moody spa atmosphere, high-end skincare advertisement style, ultra-realistic, cinematic composition, shallow depth of field, 85mm lens, high resolution, editorial beauty shot, serene and calming aesthetic.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 265,
+      "retweets": 31,
+      "replies": 27
+    }
+  },
+  {
+    "id": 19,
+    "tweet_id": "2040426883981152447",
+    "url": "https://x.com/Strength04_X/status/2040426883981152447",
+    "category": "video-generation",
+    "title": "Tropical Beverage Can Cinematic Close-up",
+    "prompt_text": "A sleek, condensation-covered aluminum can with a vibrant orange-to-golden gradient stands centered on a glossy reflective surface, surrounded by fresh mango chunks and ripe strawberries, while soft tropical palm shadows stretch across a warm sunlit backdrop. The scene opens in a tight, cinematic close-up—no zoom-out—as the camera glides slowly forward at a low angle, reflections of the can and fruit rippling subtly on the polished surface. A warm tropical breeze is introduced, gently swaying the palm leaves off-frame, causing shifting shadows to dance across the can’s surface, enhancing depth and atmosphere. Fine droplets of condensation begin to form and slide down the chilled metal, catching highlights as they move, while a few beads merge and drip slowly, reinforcing refreshment and realism. The camera transitions into a smooth micro-orbit, allowing specular highlights to travel across the curved can, revealing crisp branding and texture. Suddenly, a dynamic burst of energy: tiny droplets of chilled mist spray outward as if the can has just been opened off-camera, accompanied by floating micro-particles of moisture that shimmer in the sunlight. Mango slices rotate slightly in mid-air before settling back down, while a strawberry rolls gently, nudged by the breeze, adding natural motion. The lighting intensifies momentarily with a golden glow, creating a sun-kissed halo around the can, while subtle lens bloom enhances the tropical heat-meets-refreshment contrast. The surface reflection becomes more vivid as light shifts, doubling the visual richness. As the motion settles, the camera locks into a perfectly centered hero close-up, condensation still slowly moving, palm shadows softly swaying, and the entire scene radiating a premium, refreshing, tropical escape with bold, cinematic intensity.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 80,
+      "retweets": 3,
+      "replies": 27
+    }
+  },
+  {
+    "id": 22,
+    "tweet_id": "2039676667271004487",
+    "url": "https://x.com/aytacaltintepe/status/2039676667271004487",
+    "category": "character-design",
+    "title": "Hyper-Realistic Pastel Kawaii Portrait",
+    "prompt_text": "A high-angle perspective, approximately 15 degrees downward tilt, simulating a handheld selfie position of a Northern European / Caucasian female with fair, porcelain-toned skin, approximately 18-22 years old. She has ash platinum blonde hair with subtle cool-toned highlights, long and straight with a natural center part, falling past her chest. Her expression is seductive and pouty, with light blue-grey irises, thick voluminous black false lashes, and full symmetrical lips with a high-gloss pink finish. She is wearing a mint green satin babydoll dress with black lace trim, a black ribbon choker, and black and pink/mint striped thigh-high stockings. The background is a minimalist pink paneled wall with vertical molding and a matching pink tiled floor, with falling pink and green petals in the midground. Softbox lighting, cool daylight 5600K, hyper-realistic digital portrait photography style.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 55,
+      "retweets": 4,
+      "replies": 6
+    }
+  },
+  {
+    "id": 129,
+    "tweet_id": "1992725268855968071",
+    "url": "https://x.com/venturetwins/status/1992725268855968071",
+    "category": "video-generation",
+    "title": "Time lapse room construction",
+    "prompt_text": "time lapse construction, fast motion as a construction workers bring a tree into the living room and then construct the loft and add the couch and lights.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 2039,
+      "retweets": 171,
+      "replies": 38
+    }
+  },
+  {
+    "id": 72,
+    "tweet_id": "2018033694494335383",
+    "url": "https://x.com/lexx_aura/status/2018033694494335383",
+    "category": "video-generation",
+    "title": "Retro 70s Shag Portrait",
+    "prompt_text": "subject: Young woman, expression: Playful, winking one eye, slightly pouting, pose: Lying down, high-angle selfie perspective. hair: Retro 70s shag / wolf cut, massive, voluminous, thick fluffy bangs, textured layers, dark brown. face_and_makeup: Highly detailed skin texture, micro-details, scattered freckles, sharp black winged eyeliner, long lashes, rosy blush on nose and cheeks, glossy reddish-brown lips, large, round gold wire-rimmed glasses. attire: White coquette-style off-the-shoulder milkmaid top with puff sleeves, intricate lace trim on neckline, center ribbon bow. accessories: Gold heart locket necklace on a fine chain, subtle gold dangling earrings. environment: Intimate, bed, rumpled cream-colored linens, warm, soft, cinematic lighting. style: Photorealistic, hyper-realistic, 35mm film style, masterpiece, 8k, UHD, soft focus background, aspect_ratio: 9:16",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 179,
+      "retweets": 41,
+      "replies": 45
+    }
+  },
+  {
+    "id": 15,
+    "tweet_id": "2042228486958657788",
+    "url": "https://x.com/IqraSaifiii/status/2042228486958657788",
+    "category": "video-generation",
+    "title": "High-Speed Chase with a Stag-God",
+    "prompt_text": "8-second high-speed chase: A terrified wanderer sprints through dense mist as a colossal, mountain-sized stag-god thunders behind him. The beast smashes through ancient trees, antlers splintering massive branches. Ground-shaking heavy footfalls kick up dirt and debris. The beast's glowing green eyes leave neon streaks in the fog. High-speed shaky-cam tracking shot, epic scale dark fantasy, volumetric lighting, Unreal Engine 5 aesthetic.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 53,
+      "retweets": 4,
+      "replies": 9
+    }
+  },
+  {
+    "id": 21,
+    "tweet_id": "2039936512222191804",
+    "url": "https://x.com/oggii_0/status/2039936512222191804",
+    "category": "video-generation",
+    "title": "Seaside Alley Summer Nostalgia",
+    "prompt_text": "A quiet, narrow seaside alley in a small coastal town during mid-afternoon in summer. The alley is lined with slightly weathered pastel houses, wooden shutters half-open, soft laundry swaying gently on clotheslines overhead. Sunlight filters through the gaps, casting warm golden highlights and soft shadows across the stone path.\nAt the end of the alley, the ocean glows a vivid blue under a clear sky, shimmering with reflected sunlight. A gentle sea breeze moves through the scene, subtly rustling fabric, hair, and nearby plants.\nIn the foreground, a young child (around 8–10 years old) stands barefoot on the warm stone path, wearing light summer clothes—slightly oversized, soft fabric, moving naturally with the breeze. The child is seen from behind, gazing toward the ocean with a quiet, contemplative stillness, evoking a sense of longing and innocence.\nAmbient details: distant sound of waves, faint cries of seagulls, the soft hum of summer air. Small details like potted plants, peeling paint, and sun-faded textures add realism and nostalgia.\nCamera & Style: Slow cinematic push-in toward the child from behind, shallow depth of field at first, gradually revealing the ocean in sharper focus. Natural lighting, soft bloom, warm color grading with slightly desaturated tones for a nostalgic feel. Subtle lens flare from sunlight.\nMood & Tone: Peaceful, reflective, nostalgic, emotionally warm. A quiet moment of everyday beauty, capturing childhood wonder and the timeless feeling of summer.\nVisual Style Keywords: cinematic realism, soft lighting, nostalgic atmosphere, slice of life, Studio Ghibli-inspired realism, natural textures, warm summer tones, gentle motion\nTechnical Tags (optional): 4K, high detail, global illumination, volumetric light, realistic materials, film grain, soft focus transitions",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 109,
+      "retweets": 10,
+      "replies": 30
+    }
+  },
+  {
+    "id": 87,
+    "tweet_id": "2015346757077807427",
+    "url": "https://x.com/Strength04_X/status/2015346757077807427",
+    "category": "cinematic",
+    "title": "Man and Penguin in Antarctic Habitat",
+    "prompt_text": "Glooomyboy style, ultra-realistic photograph of a young man sitting naturally on a jagged, snowy rock in an icy Antarctic habitat. The man is wearing detailed winter clothing including a thick parka, knitted scarf, heavy gloves, and a beanie. He is smiling gently while reaching out to touch a king penguin standing next to him. The background features snow, glacial ice, rocks, and frozen water with crisp reflections. 8k resolution, cinematic lighting, highly textured, photorealistic.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 129,
+      "retweets": 7,
+      "replies": 21
+    }
+  },
+  {
+    "id": 103,
+    "tweet_id": "2013083809038905367",
+    "url": "https://x.com/Strength04_X/status/2013083809038905367",
+    "category": "character-design",
+    "title": "Cute Anthropomorphic Bunny Character",
+    "prompt_text": "A full-body 3D render of a cute yet cool anthropomorphic bunny character, standing confidently in a minimalist studio setting. The bunny has soft dark-gray fur with realistic plush texture, long upright ears, and a small pink nose. It is wearing black sunglasses with thin gold frames, a loose black oversized T-shirt featuring a simple white skull icon on the chest, cream-colored knee-length shorts with subtle fabric ribbing, and light orange sneakers with white soles. Hands casually placed in pockets, relaxed street-style pose.Clean neutral gray background, soft diffused studio lighting, gentle shadows, centered composition. Ultra-detailed, high realism, Pixar-quality character design, modern toy-figure aesthetic, smooth depth of field, cinematic lighting, 4K render. - 9:16",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 202,
+      "retweets": 12,
+      "replies": 52
+    }
+  },
+  {
+    "id": 123,
+    "tweet_id": "1998467773714886818",
+    "url": "https://x.com/HBCoop_/status/1998467773714886818",
+    "category": "video-generation",
+    "title": "HUD Overlay in Redwood Forest",
+    "prompt_text": "A soft, diffused natural light video of the woman kneeling in a dense, mossy redwood forest. She person is holding her hand toward a patch of ferns. A semi-transparent, glowing green AR data tag identifying 'Polypodiopsida (Common Fern)' slowly floats up from the plant. She taps the digital card and the screen types out more information about fern's habitats and growing conditions. The camera holds a wide, steady shot, emphasizing the depth and mist of the forest environment.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 208,
+      "retweets": 24,
+      "replies": 12
+    }
+  },
+  {
+    "id": 51,
+    "tweet_id": "2024067090873983098",
+    "url": "https://x.com/ZaraIrahh/status/2024067090873983098",
+    "category": "video-generation",
+    "title": "Surreal Mister Donut Hamster Room",
+    "prompt_text": "A surreal cinematic scene: warm sunlight pours in through a massive side window. In the center of the wooden floor sits a brand-new Mister Donut box, rendered in soft tones, its iconic logo glowing brightly in the natural light. Shot with a wide-angle lens, the box trembles slightly, then slowly opens by itself. Dozens of vibrant, dazzling donuts pop out, each transforming mid-air into whimsical furniture — a donut-shaped running wheel, jelly-glazed tunnels, climbing frames decorated with frosting swirls, and more. A cute little hamster appears and happily hops into this fully donut-themed room.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 85,
+      "retweets": 9,
+      "replies": 46
+    }
+  },
+  {
+    "id": 109,
+    "tweet_id": "2009900632527036785",
+    "url": "https://x.com/Strength04_X/status/2009900632527036785",
+    "category": "video-generation",
+    "title": "Surreal Coffee Pour over Palm Jumeirah",
+    "prompt_text": "An aerial photograph captures a surreal scene where a giant white foam cup, branded with the 'SC Social Connects' logo, is placed on the central trunk of the Palm Jumeirah in Dubai. A hand holds a glass and metal coffee pot, pouring steaming coffee into the oversized cup. The Palm's fronds, marina, and Dubai's skyline are bathed in warm, golden sunset light, with long shadows and reflections on the water.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 177,
+      "retweets": 16,
+      "replies": 32
+    }
+  },
+  {
+    "id": 77,
+    "tweet_id": "2017630814599872867",
+    "url": "https://x.com/lexx_aura/status/2017630814599872867",
+    "category": "character-design",
+    "title": "Golden Hour Grunge Portrait",
+    "prompt_text": "Portrait of a young woman with a soft, confident smile and a slight head tilt, direct eye contact. She has long, voluminous, messy wavy hair with layers, dark chocolate brown with intense reddish-copper highlights from backlighting, tousled with natural flyaways illuminated by the sun. Her face features fair skin with visible natural texture, prominent freckles across her nose and cheeks, winged eyeliner, groomed arched eyebrows, plump lips with a natural pink tint, and a silver septum piercing. She is wearing an oversized flannel shirt in a dark brown, black, and white checkered pattern, slouched off one shoulder for a casual grunge aesthetic, with a white ribbed tank top visible underneath. The setting is an outdoor residential backyard or garden with sharply focused trees, foliage, and a house roofline in the background, creating a warm, sunny, summery, relaxed indie vibe. The lighting is natural golden hour sunlight with strong lens flare from the top, a halo effect glowing through her hair, and soft dappled shadows on her face. 4K Ultra HD, photorealistic, highly detailed texture, deep depth of field with everything in sharp focus, portrait photography with a raw look.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 315,
+      "retweets": 68,
+      "replies": 80
+    }
+  },
+  {
+    "id": 30,
+    "tweet_id": "2033023242940854498",
+    "url": "https://x.com/Strength04_X/status/2033023242940854498",
+    "category": "product-photography",
+    "title": "Classy Potato Chips Commercial Photography",
+    "prompt_text": "Ultra-realistic commercial snack product photography of a tall cylindrical chips can labeled “Classy Potato – Salt & Vinegar Flavour” standing upright on a rustic wooden kitchen table. The colorful can features a blue body with the Classy brand logo at the top and a crisp potato chip illustration on the label. Around the can, golden potato chips explode outward in mid-air as if bursting from the container, frozen in motion with small crumbs and seasoning particles floating around them.\n\nSome chips hover around the can while others scatter onto the wooden table surface. The background shows a softly blurred cozy kitchen interior with warm sunlight streaming through a window, creating glowing highlights and natural bokeh. Cinematic lighting from the window illuminates the chips, emphasizing their crispy texture and golden color, while subtle shadows add depth to the scene.\n\nHigh-end food advertising style, macro product photography, ultra-detailed textures, shallow depth of field, photorealistic, 8K resolution.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 76,
+      "retweets": 7,
+      "replies": 35
+    }
+  },
+  {
+    "id": 13,
+    "tweet_id": "2044440575009771536",
+    "url": "https://x.com/Strength04_X/status/2044440575009771536",
+    "category": "video-generation",
+    "title": "Lipton Teacup Mountain",
+    "prompt_text": "A colossal mountain shaped like a ceramic Lipton teacup, with glowing lava flowing down the sides like steeped tea. The Lipton logo is prominently displayed and large, carved clearly into the rocky surface and illuminated by the light of the lava. Steam rises from the top naturally, as if the mountain is brewing tea. The surrounding clouds and valleys add a dreamy quality, while a serene lake reflects the entire scene. Highly detailed, fantasy realism with volumetric fog and a strong product presence.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 79,
+      "retweets": 4,
+      "replies": 42
+    }
+  },
+  {
+    "id": 43,
+    "tweet_id": "2028452369311400392",
+    "url": "https://x.com/oggii_0/status/2028452369311400392",
+    "category": "video-generation",
+    "title": "Kamen Rider Style Henshin Sequence",
+    "prompt_text": "Subject inserts a glowing Ridewatch into the Ziku-Driver and spins it 360 degrees. A 'mechanical reveal' begins as white and gold armor plates materialize piece-by-piece, snapping onto the torso, shoulders, and legs with robotic precision. Rapidly rotating golden clock hands and glowing orange pixelated data streams wrap around her body against a giant glowing crescent moon background. The sequence concludes with the helmet visor flashing pink katakana eyes as she shifts into a powerful combat stance, executing a sharp martial arts strike with her white cape flowing majestically.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 50,
+      "retweets": 2,
+      "replies": 16
+    }
+  },
+  {
+    "id": 57,
+    "tweet_id": "2020862086138691603",
+    "url": "https://x.com/Strength04_X/status/2020862086138691603",
+    "category": "video-generation",
+    "title": "ASMR Pineapple Slicing",
+    "prompt_text": "Ultra realistic ASMR video of a fresh ripe pineapple being cut into a glass-shaped cylinder. Close-up macro shot, natural kitchen lighting, high detail pineapple texture, visible juice droplets, slow precise knife slicing. Sound focus: crisp crunchy cutting sound, juicy wet fiber tearing sound, subtle knife sliding on cutting board, natural room ambience, no music, stereo binaural ASMR audio. Visual detail: yellow golden pineapple flesh, fresh green crown slightly visible on table, wooden cutting board, stainless steel sharp knife, realistic juice splashing slightly when sliced. Camera: slow cinematic movement, macro lens, depth of field, focus on knife entering pineapple flesh. Style: hyper realistic, 4K, natural color grading, food photography realism, satisfying ASMR style.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 153,
+      "retweets": 14,
+      "replies": 27
+    }
+  },
+  {
+    "id": 63,
+    "tweet_id": "2019297203039400354",
+    "url": "https://x.com/Strength04_X/status/2019297203039400354",
+    "category": "product-photography",
+    "title": "Exploding Fusilli Pasta Frozen Action",
+    "prompt_text": "Exploding fusilli pasta rising from a rustic ceramic bowl on a dark stone table, cherry tomatoes, fresh basil leaves, grated parmesan cheese, garlic slices, red chili flakes, olive oil droplets flying in mid-air, cheese dust particles, upward spiral motion, frozen action food photography.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 187,
+      "retweets": 20,
+      "replies": 31
+    }
+  },
+  {
+    "id": 76,
+    "tweet_id": "2017890701049299425",
+    "url": "https://x.com/Strength04_X/status/2017890701049299425",
+    "category": "video-generation",
+    "title": "Premium Intimate Care Product Ad",
+    "prompt_text": "Create an ultra-premium luxury product ad video for a high-end intimate shower gel. PRODUCT: A black glass pump bottle labeled: “BARBARU — Banana Rule — Intimate Shower Gel” Resting on a sculptural pile of ripe bananas, with golden gel dripping slowly over the bottle and fruit. TARGET EMOTION : Extreme luxury. Sensual. Slow confidence. Expensive energy. Editorial fashion-ad quality. Scene progression: Opening: Dark, matte black background.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 132,
+      "retweets": 13,
+      "replies": 32
+    }
+  },
+  {
+    "id": 84,
+    "tweet_id": "2016165562444103911",
+    "url": "https://x.com/Strength04_X/status/2016165562444103911",
+    "category": "video-generation",
+    "title": "Real-world POV with live AR insights",
+    "prompt_text": "A realistic first-person perspective (POV) shot of a person's hands holding a bunch of fresh, red strawberries in a blurred supermarket aisle. The image features a futuristic Augmented Reality (AR) interface overlay. Glowing holographic graphics surround the strawberries displaying nutritional information like 'Calories 50kcal', 'Vitamin C', 'Folate', and 'Fiber'. On the right, a digital gauge shows 'Freshness 95%' and recipe suggestions like 'Strawberry Smoothie'. On the left, a holographic shopping list checks off items like Milk and Bread. High-tech, smart shopping concept, photorealistic lighting, 8k resolution.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 130,
+      "retweets": 5,
+      "replies": 15
+    }
+  },
+  {
+    "id": 110,
+    "tweet_id": "2008912370551357865",
+    "url": "https://x.com/Strength04_X/status/2008912370551357865",
+    "category": "product-photography",
+    "title": "Teddy Bear Mascot in Coca-Cola Can",
+    "prompt_text": "A cute, cinematic brand fantasy scene featuring a fluffy white teddy bear mascot emerging from a chilled soda Coca-Cola can, holding a colorful striped straw. The can is placed inside a glowing refrigerator filled with neatly stacked glass soda bottles. Soft neon lighting, pastel reflections, condensation droplets on metal, playful yet premium advertising style. Shallow depth of field, ultra-detailed fur texture, glossy highlights, vibrant red-and-white color pal-ette, whimsical mood, Pixar-level realism, stu-dio-quality lighting, high contrast, square composi-tion, 1080×1080, ultra-HD, commercial brand photog-raphy.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 140,
+      "retweets": 5,
+      "replies": 38
+    }
+  },
+  {
+    "id": 119,
+    "tweet_id": "1999049052504125559",
+    "url": "https://x.com/LudovicCreator/status/1999049052504125559",
+    "category": "video-generation",
+    "title": "Ancient Temple Ritual",
+    "prompt_text": "high-angle cinematic perspective, slow descending crane shot, ancient stone temple hidden deep within a mist-filled jungle, ornate carvings glowing faintly with age-old symbols, robed figures forming a circle around an altar made of weathered obsidian, swirling incense smoke rising into shafts of golden light, subtle movements as the ritual begins, low resonant chanting in a mystical tone (chanting in an invented ancient language), deep echoing drums and faint metallic chimes, no subtitles, dramatic volumetric lighting piercing through the temple’s broken ceiling, epic mythological cinematic style with rich textures and grand scale",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 58,
+      "retweets": 6,
+      "replies": 12
+    }
+  },
+  {
+    "id": 121,
+    "tweet_id": "1998808735838347661",
+    "url": "https://x.com/HBCoop_/status/1998808735838347661",
+    "category": "video-generation",
+    "title": "Gym Deadlift with HUD Overlay",
+    "prompt_text": "Inside a gritty gym, the camera pushes in on a man mid-deadlift. He completes the deadlift in a smooth motion and lowers it to the floor. A neon green HUD pops alive beside him, graph lines animating upward as “Power Output: 460W (Peak)” spikes in real time. A second chart renders below, adjusting as his spine angle shifts, highlighting “Form: OPTIMAL (88°).” The HUD updates frame-by-frame with micro-changes in his movement. Harsh overhead lighting and motion blur intensify the energy.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 196,
+      "retweets": 28,
+      "replies": 0
+    }
+  },
+  {
+    "id": 10,
+    "tweet_id": "2048751493197763007",
+    "url": "https://x.com/jasminekhan90_/status/2048751493197763007",
+    "category": "video-generation",
+    "title": "Memory Clouds and Future Glitches",
+    "prompt_text": "Hyper-realistic cinematic wide shot of a modern city under a vast open sky. The sky acts like a living memory screen where clouds form detailed, realistic human memories—childhood scenes, emotional moments, daily life fragments—spreading across the atmosphere like a giant natural holographic display. People in the streets stop and stare upward in shock and confusion. The camera slowly tilts up toward the sky as the memory clouds continue replaying the past in smooth motion. Suddenly, the clouds begin to distort and flicker with digital buffering glitches. The sky pauses, as if the system is loading. The atmosphere becomes silent and tense. Then the buffering ends, and the sky shifts unexpectedly—now showing brief, clear glimpses of future events happening seconds ahead in the city below: people moving before they move, cars slightly ahead of motion, reality misaligned. Cinematic lighting, ultra-realistic cloud physics, dramatic ton",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 130,
+      "retweets": 7,
+      "replies": 4
+    }
+  },
+  {
+    "id": 18,
+    "tweet_id": "2040885990869332385",
+    "url": "https://x.com/LudovicCreator/status/2040885990869332385",
+    "category": "video-generation",
+    "title": "White Tiger in Frozen Tundra",
+    "prompt_text": "Low-angle tracking shot, smooth dolly movement across snowy terrain, a powerful white tiger strides silently through the frozen tundra surrounded by frost-covered pine trees and drifting snowflakes, its breath visible in the icy air as it scans the landscape with piercing blue eyes, muffled ambient sounds of wind whistling and distant cracking ice, soft diffused daylight filtering through overcast skies, cinematic wildlife documentary style with a dramatic and moody atmosphere.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 104,
+      "retweets": 13,
+      "replies": 6
+    }
+  },
+  {
+    "id": 20,
+    "tweet_id": "2039937752762843570",
+    "url": "https://x.com/Ozayrr_irl/status/2039937752762843570",
+    "category": "video-generation",
+    "title": "Colossal Dragon Emerging from Clouds",
+    "prompt_text": "Cinematic low-angle tracking shot of colossal dark scaly dragon emerging powerfully from vast sea of white clouds. Massive spiked head turns slowly with menacing grace, jaws gaping wide in thunderous roar with realistic muscle tension and scale flexing. Thick white mist and breath blast outward, swirling clouds dynamically part around its long serpentine neck and body. Epic scale, hyper-realistic creature motion and fluid cloud physics.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 52,
+      "retweets": 3,
+      "replies": 26
+    }
+  },
+  {
+    "id": 36,
+    "tweet_id": "2030507585330385394",
+    "url": "https://x.com/Strength04_X/status/2030507585330385394",
+    "category": "video-generation",
+    "title": "Slow-motion Coffee Commercial",
+    "prompt_text": "slow-motion coffee commercial animation where espresso is poured into a cup from above, coffee stream flowing smoothly while roasted coffee beans rotate around the cup in mid-air, steam rising naturally, rich crema forming on the surface of the coffee, dramatic dark café lighting highlighting the glossy coffee texture.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 90,
+      "retweets": 10,
+      "replies": 29
+    }
+  },
+  {
+    "id": 40,
+    "tweet_id": "2028766702138441744",
+    "url": "https://x.com/Strength04_X/status/2028766702138441744",
+    "category": "video-generation",
+    "title": "Hyper-realistic video generation",
+    "prompt_text": "A cinematic, hyper-realistic close-up shot of a peeled banana sitting on a sleek, dark reflective surface. The camera slowly pans around the banana, capturing the intricate texture of its soft, pale yellow flesh and the fibrous strands clinging to the peel. Soft, dramatic studio lighting from the side highlights the subtle moisture on the fruit, casting a gentle, soft-edged shadow. The background is a dark, out-of-focus minimalist kitchen, creating a shallow depth of field that emphasizes the banana's realistic details. The motion is smooth and slow, mimicking high-end commercial cinematography.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 102,
+      "retweets": 6,
+      "replies": 16
+    }
+  },
+  {
+    "id": 58,
+    "tweet_id": "2020811413271547943",
+    "url": "https://x.com/Strength04_X/status/2020811413271547943",
+    "category": "product-photography",
+    "title": "Soda Can Crashing into Ice",
+    "prompt_text": "photograph, hyper-realistic cinematic commercial product photography, soda can crashing into ice, dynamic diagonal composition, razor-sharp can with ultra-detailed surface, explosive water splashes frozen mid-air, shards of ice suspended in motion, whole apples and apple fragments, slow-motion freeze, dense realistic water droplets, ultra-detailed aluminum surface, glossy highlights with controlled specular reflections, intense directional studio lighting, high contrast with deep shadows, sharp glossy highlights on metal and water, dark cinematic backdrop, dramatic and high-impact atmosphere, shallow depth of field, high-energy diagonal framing, luxury beverage advertising, bold, explosive, premium, 8K, ultra-detailed, professional high-end commercial realism",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 226,
+      "retweets": 18,
+      "replies": 9
+    }
+  },
+  {
+    "id": 59,
+    "tweet_id": "2020370009911185588",
+    "url": "https://x.com/Cicily_aura/status/2020370009911185588",
+    "category": "product-photography",
+    "title": "Dua Lipa Yoga Portrait",
+    "prompt_text": "Photorealistic 8K full-body portrait of a beautiful young woman strongly resembling Dua Lipa, early 20s, athletic toned build with natural curves, full bust, fair flushed skin with realistic post-yoga sweat droplets on face, neck, chest, shoulders, and midriff, subtle freckles and visible pores. Blonde hair styled in a loose, messy damp ponytail with strands framing the face and sticking to the neck. Large blue eyes with a calm, confident direct gaze, soft subtle smile, small beauty mark on cheek. Performing an elegant upward-facing dog yoga pose: prone on mat, upper body arched back, chest open, arms straight, hips and thighs slightly lifted, legs extended. Wearing a fitted lime green ribbed sports bra crop top with a deep scoop neckline and thick straps, paired with high-waisted white yoga leggings. Soft natural window light in a modern yoga studio, subtle sweat sheen highlights, shallow depth of field with sharp focus on subject and bokeh background, intimate athletic post-yoga glow, masterpiece.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 104,
+      "retweets": 25,
+      "replies": 51
+    }
+  },
+  {
+    "id": 61,
+    "tweet_id": "2020318286538473577",
+    "url": "https://x.com/Strength04_X/status/2020318286538473577",
+    "category": "product-photography",
+    "title": "Luxury Sports Car in Rain",
+    "prompt_text": "Hyper-realistic cinematic product photograph of a luxury sports car front three-quarter view, glossy paint reflecting sharp highlights. Water mist and rain droplets explode around the car in frozen motion, light streaks emphasizing speed. Dramatic studio lighting with strong rim light and soft fill, shallow depth of field, ultra-sharp focus, dark minimal background, premium automotive advertising realism.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 185,
+      "retweets": 8,
+      "replies": 35
+    }
+  },
+  {
+    "id": 66,
+    "tweet_id": "2018980850650800543",
+    "url": "https://x.com/ZaraIrahh/status/2018980850650800543",
+    "category": "video-generation",
+    "title": "NYC Skyline Sunset to Dawn Transition",
+    "prompt_text": "Wide cinematic shots transitioning from sunset to dawn, capturing New York City’s skyline—the Statue of Liberty, Lower Manhattan, One World Trade Center, the Brooklyn Bridge, and Midtown skyscrapers—with a slow upward camera tilt.\nLens: 24mm wide-angle, 30fps.\nCamera: Stable, with a subtle pan that follows the horizon and the gradual rise of the city.\n\nSubject\n\nNew York City’s cityscape transitioning from sunset to dawn. Warm golden-hour light washes over the skyline, slowly fading into cool blue and violet twilight, then into soft early-morning tones as the first sunlight gently illuminates glass towers and historic structures. Visible elements include illuminated bridges, shimmering reflections on the Hudson and East Rivers, glowing streets, street lamps, and slow-moving clouds above the city.\n\nScene\n\nLocation: New York City, filmed from a rooftop, observation deck, or elevated riverfront overlooking Manhattan.\nTime: Sunset through early morning.\nEnvironment: Clear skies transitioning from warm sunset hues to cool twilight, then into calm, pastel dawn light as the city wakes.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 102,
+      "retweets": 20,
+      "replies": 57
+    }
+  },
+  {
+    "id": 90,
+    "tweet_id": "2015040219117203595",
+    "url": "https://x.com/Strength04_X/status/2015040219117203595",
+    "category": "video-generation",
+    "title": "Cozy Rainy Night Hut",
+    "prompt_text": "A dark, quiet night ASMR scene with heavy rain falling gently. The environment is almost completely dark, illuminated only by soft moonlight in the sky. A small wooden hut surrounded by a lot of greenery stands in the darkness. From the side angle, a warm lantern light glows softly through the window, creating a cozy contrast with the cold blue moonlight. Rain dripping from the roof, wet wooden walls, misty air, calm and peaceful mood, ultra realistic, cinematic lighting.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 152,
+      "retweets": 11,
+      "replies": 48
+    }
+  },
+  {
+    "id": 106,
+    "tweet_id": "2011007853872472286",
+    "url": "https://x.com/LudovicCreator/status/2011007853872472286",
+    "category": "video-generation",
+    "title": "Rally Car Drifting on Mountain Pass",
+    "prompt_text": "As the camera soars overhead, a rally car speeds along a narrow mountain pass, its vibrant red body glinting under the wintry sun. Snow drifts whirl around its tires, sending flurries into the air as the vehicle elegantly drifts into a sharp turn, tracing graceful arcs against the untouched white canvas below. The breathtaking drama unfolds amid soaring, snow-dusted peaks, each moment a captivating dance of speed and peril.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 77,
+      "retweets": 12,
+      "replies": 15
+    }
+  },
+  {
+    "id": 118,
+    "tweet_id": "2000136221444452498",
+    "url": "https://x.com/LudovicCreator/status/2000136221444452498",
+    "category": "cinematic",
+    "title": "Neo-Noir Rooftop Walk",
+    "prompt_text": "Third-person perspective, wide establishing shot slowly pushing forward, a lone figure in a long coat walking across a rain-soaked rooftop overlooking a sprawling neon cityscape at night, mist swirling around glowing billboards as puddles ripple beneath each step, subtle wind tugging at the coat, distant sirens and low industrial hum filling the ambience, dramatic rim lighting from neon reflections and soft volumetric glow cutting through the fog, hyper-cinematic neo-noir style with no dialogue and no subtitles.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 114,
+      "retweets": 18,
+      "replies": 13
+    }
+  },
+  {
+    "id": 56,
+    "tweet_id": "2021625355313066263",
+    "url": "https://x.com/crystalsssup/status/2021625355313066263",
+    "category": "Text-to-Video",
+    "title": "GenAI Video Model Market Analysis - HBR Style",
+    "prompt_text": "Conduct a comprehensive analysis of the GenAI video model market, focusing on leading players (e.g., Seedance 2.0, Kling, Veo, Luma).\n\nRequirement: A sophisticated editorial layout in the signature Harvard Business Review style. Core Layout: A masterful balance of white space and dense intellectual content. Features a prominent, central conceptual framework (like a flywheel or a 5-step maturity model) using bold, thick lines. Sidebar includes \"Key Takeaways\" or \"Managerial Implications\" in a separate column.\n\nVisual Style: Elegant and academic. Typography uses a distinct Slab-Serif for titles and a classic Serif for body text.\n\nColor palette: HBR Signature Crimson Red as the primary accent, charcoal grey for text, and a light cream or pure white background. Minimalist but impactful.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 639,
+      "retweets": 70,
+      "replies": 16
+    }
+  },
+  {
+    "id": 79,
+    "tweet_id": "2017358548280193383",
+    "url": "https://x.com/AllaAisling/status/2017358548280193383",
+    "category": "video-generation",
+    "title": "Museum Disaster Flash Flood",
+    "prompt_text": "A flash flood evolves in real-time, new features emerging through a museum after hours. Tight tracking shot stays locked on the subject through chaos. The glow of destruction provides the only light. Raw, powerful.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 64,
+      "retweets": 5,
+      "replies": 5
+    }
+  },
+  {
+    "id": 64,
+    "tweet_id": "2019128512725283298",
+    "url": "https://x.com/Strength04_X/status/2019128512725283298",
+    "category": "product-photography",
+    "title": "Volt Pulse Energy Drink Ad",
+    "prompt_text": "Ultra-cinematic product photography of a neon-orange energy drink can labeled “VOLT PULSE – CITRUS RUSH,” floating mid-air at a bold angle. Electric orange liquid splashes with sliced lemons and limes frozen in motion, icy droplets suspended. High-contrast studio lighting, sharp rim lights, glowing neon accents, warm citrus palette, hyper-realistic condensation, shallow depth of field, 8K luxury ad style.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 158,
+      "retweets": 15,
+      "replies": 22
+    }
+  },
+  {
+    "id": 67,
+    "tweet_id": "2019011452062085174",
+    "url": "https://x.com/Cicily_aura/status/2019011452062085174",
+    "category": "video-generation",
+    "title": "Kylie Jenner in Red Portrait Video",
+    "prompt_text": "Portrait Video of Kylie Jenner. Subtle confident look with natural engagement to camera, direct or casual eye contact. Long, sleek waves or casual loose dark brown/black hair with soft natural highlights, smooth, flowing with gentle movement. Warm, sunlit complexion, soft glamorous makeup (defined eyes, neutral lips), light contour and highlight reflecting golden hour lighting, minimal but elegant jewelry. Chic fitted top, high-fashion pants or skirt matching the aesthetic, stylish everyday chic with effortless glam. Outdoor or indoor Instagram aesthetic (clean background or lifestyle setting), soft, blurred background to emphasize subject, relaxed lifestyle vibe with warm tones. Natural light or soft studio light, warm tones enhancing skin glow, soft shadows for depth. Casual walk, makeup application, or lifestyle moment, smooth handheld/portrait motion. 4K Ultra HD, photorealistic, highly detailed texture, deep depth of field with crisp subject and soft background, cinematic Instagram reel aesthetic.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 63,
+      "retweets": 22,
+      "replies": 29
+    }
+  },
+  {
+    "id": 111,
+    "tweet_id": "2004847240188248076",
+    "url": "https://x.com/LudovicCreator/status/2004847240188248076",
+    "category": "video-generation",
+    "title": "Bald Eagle Soaring Over Mountains",
+    "prompt_text": "Aerial perspective, ultra-slow-motion cinematic wide shot, a majestic bald eagle with powerful wingspan soaring high above a vast mountain range, snow-capped peaks and deep valleys beneath, the eagle glides effortlessly through swirling clouds while occasionally beating its wings, feathers sharply detailed and moving with the wind, dramatic natural ambience with rushing wind and distant echoes of nature, no voice-over and no subtitles, golden hour lighting with warm sunlight illuminating the eagle’s feathers and casting long shadows on the mountains, epic cinematic style, high contrast, shallow depth of field, 8K realism, nature documentary film aesthetic",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 163,
+      "retweets": 28,
+      "replies": 0
+    }
+  },
+  {
+    "id": 100,
+    "tweet_id": "2013273152932176062",
+    "url": "https://x.com/Strength04_X/status/2013273152932176062",
+    "category": "cinematic",
+    "title": "Vertically Stacked Monitors Coffee Pour",
+    "prompt_text": "Hyper-realistic 8K cinematic artwork with two vertically stacked computer monitors (one on top of the other) on a wooden table. On the top monitor, a character (gender-flexible, face exactly as uploaded photo, same headpiece) wearing a casual navy blue outfit (gender-flexible style) pours steaming hot coffee from a French press without holding the cup. On the bottom monitor, the same character (gender-flexible, face exactly as uploaded photo, same headpiece) - now wearing a white shirt with a black jacket (gender-flexible style) - tilts his cup upward with a surprised expression as the coffee streams perfectly into it. Coffee steam visually rises across both monitors, uniting the two scenes. Warm cafe-style lighting and soft wood textures create a cozy atmosphere.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 252,
+      "retweets": 20,
+      "replies": 19
+    }
+  },
+  {
+    "id": 97,
+    "tweet_id": "2013814662744486265",
+    "url": "https://x.com/ChillaiKalan__/status/2013814662744486265",
+    "category": "video-generation",
+    "title": "Romantic Valentine's Day Couple",
+    "prompt_text": "A romantic Valentine’s Day scene featuring the same two lovers from the reference image. The couple is standing close together, warmly hugging each other, smiling with natural affection. Both are raising their hands together in front of their chest, forming a heart shape using their index and middle fingers. Their expressions are soft, happy, and intimate. The background is decorated with glowing heart-shaped lights, rose flower arches, fairy lights, and floating heart balloons in red, pink, and white tones. Soft warm lighting, cinematic depth of field, dreamy bokeh hearts, cozy romantic atmosphere, ultra-realistic skin texture, detailed clothing, natural poses, high resolution, shallow depth, Valentine’s aesthetic, romantic photography style.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 68,
+      "retweets": 6,
+      "replies": 44
+    }
+  },
+  {
+    "id": 60,
+    "tweet_id": "2020361322958078157",
+    "url": "https://x.com/Strength04_X/status/2020361322958078157",
+    "category": "video-generation",
+    "title": "High-Energy Product Video",
+    "prompt_text": "Create an extreme fast-paced product video using the uploaded image as the visual reference.\n\nSTYLE:\nUltra-fast\nHigh-energy\nRaw\nNo cinematic look\nNo dramatic lighting\nNo slow motion\nNo soft transitions\nNo glow, no flares, no mood lighting\n\nCAMERA:\nCamera is completely static.\nNo zoom.\nNo pan.\nNo rotation.\nSingle locked shot.\n\nACTION:\nThe scene starts with the can perfectly still.\n\nSuddenly:\n– Orange slices lift sharply upward into mid-air.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 196,
+      "retweets": 6,
+      "replies": 17
+    }
+  },
+  {
+    "id": 7,
+    "tweet_id": "2050894245293137929",
+    "url": "https://x.com/TrekDeFi/status/2050894245293137929",
+    "category": "video-generation",
+    "title": "Church After Service Moments",
+    "prompt_text": "realistic church after service, people greeting, handshake, light convo “Hey, good to see you.” “You too!”, warm lighting, one shot, cinematic, 4K",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 186,
+      "retweets": 38,
+      "replies": 57
+    }
+  },
+  {
+    "id": 126,
+    "tweet_id": "1996316130227667443",
+    "url": "https://x.com/CuriousRefuge/status/1996316130227667443",
+    "category": "video-generation",
+    "title": "AI Video Generation Benchmark Prompts",
+    "prompt_text": "Prompt 1: camera tracking shot, wide-shot. The camera tracks above as two nights ride on horses through a forest. The horses a galloping fast. The camera is tracking the knights from above.\n\nPrompt 2: Slow camera push in on a man eating Ramen at a Ramen house in Japan. The alley street is busy with people.\n\nPrompt 3: Close-up shot of a man on a sailboat. The man has a scared look on his face. After a short pause, the man says, \"I'm gonna need a bigger boat”\n\nPrompt 4: Static camera. A man picks up a cookie from a plate and takes a bite. His dog looks up at him; eagerly wanting a bite of the cookie. The man turns, looks at the dog, and says, \"no cookies for you mister”",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 421,
+      "retweets": 55,
+      "replies": 16
+    }
+  },
+  {
+    "id": 46,
+    "tweet_id": "2026536517926371380",
+    "url": "https://x.com/Strength04_X/status/2026536517926371380",
+    "category": "video-generation",
+    "title": "McDonald's Building Turned Into Giant Hamburger",
+    "prompt_text": "A McDonald's building turned into a giant glowing hamburger and it actually looks real",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 76,
+      "retweets": 19,
+      "replies": 13
+    }
+  },
+  {
+    "id": 27,
+    "tweet_id": "2036833065016910083",
+    "url": "https://x.com/knoxtwts/status/2036833065016910083",
+    "category": "Commercial / Product",
+    "title": "Skincare Product Showcase",
+    "prompt_text": "photorealistic woman in her 30s holding a skincare bottle in a bathroom with morning light, shot on iphone.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 130,
+      "retweets": 8,
+      "replies": 12
+    }
+  },
+  {
+    "id": 82,
+    "tweet_id": "2016383898008395822",
+    "url": "https://x.com/ZaraIrahh/status/2016383898008395822",
+    "category": "video-generation",
+    "title": "ASMR Butterfly in a Colorful Garden",
+    "prompt_text": "ASMR sound of a playful butterfly dancing through a colorful garden, soft fluttering wings, tiny air swirls as it moves between flowers, leaves and petals gently swaying in the breeze, dreamy and peaceful vibe, no human voice, no music, crystal-clear stereo audio, rich natural ambience, warm sunny morning glow, relaxing yet enchanting, perfect for meditation, sleep, and nature therapy. Static camera.",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 75,
+      "retweets": 8,
+      "replies": 58
+    }
+  },
+  {
+    "id": 48,
+    "tweet_id": "2026265856779423971",
+    "url": "https://x.com/michaelrabone/status/2026265856779423971",
+    "category": "video-generation",
+    "title": "Stereoscopic Expired Kodak Portrait",
+    "prompt_text": "Stereoscopic portrait, photo taken on expired Kodak Gold 35mm film",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 109,
+      "retweets": 8,
+      "replies": 2
+    }
+  },
+  {
+    "id": 34,
+    "tweet_id": "2031368761400512541",
+    "url": "https://x.com/Strength04_X/status/2031368761400512541",
+    "category": "video-generation",
+    "title": "Molten Chocolate Lava Cake",
+    "prompt_text": "Molten chocolate lava cake captured in ultra realistic detail",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 50,
+      "retweets": 1,
+      "replies": 20
+    }
+  },
+  {
+    "id": 128,
+    "tweet_id": "1992891223657546140",
+    "url": "https://x.com/caleb_friesen/status/1992891223657546140",
+    "category": "video-generation",
+    "title": "Footpath Restoration Timelapse",
+    "prompt_text": "time lapse construction, fast motion as construction workers beautify and restore the footpath",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 737,
+      "retweets": 98,
+      "replies": 29
+    }
+  },
+  {
+    "id": 130,
+    "tweet_id": "1987068711371760046",
+    "url": "https://x.com/madpencil_/status/1987068711371760046",
+    "category": "video-generation",
+    "title": "FPV Fly Through Shot",
+    "prompt_text": "A dynamic high speed FPV fly through shot weaving and cutting corners through (your scene description and place), motion blur, lens glare",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 76,
+      "retweets": 8,
+      "replies": 12
+    }
+  },
+  {
+    "id": 23,
+    "tweet_id": "2039742988578877704",
+    "url": "https://x.com/viktoroddy/status/2039742988578877704",
+    "category": "video-generation",
+    "title": "Nano Banana",
+    "prompt_text": "Nano Banana",
+    "notes": null,
+    "author": {
+      "name": "Unknown",
+      "screen_name": "unknown",
+      "followers": 0
+    },
+    "engagement": {
+      "likes": 490,
+      "retweets": 33,
+      "replies": 22
+    }
+  }
+] // PROMPTS_ARRAY_SENTINEL;
+
+        function formatNumber(num) {
+            return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num;
+        }
+
+        function createPromptCard(prompt) {
+            return `
+                <article class="prompt-card">
+                    <div class="card-image" onclick="openModal('${prompt.tweet_id}')" style="cursor:pointer;">
+                        <img src="generated_images/${prompt.id}.png" alt="Prompt preview" loading="lazy" onerror="this.src='https://picsum.photos/seed/${prompt.tweet_id}/550/307'">
+                    </div>
+                    <div class="card-body">
+                        <span class="prompt-category" data-category="${prompt.category}">${prompt.category.replace('-', ' ')}</span>
+                        <h3 class="prompt-title" onclick="openModal('${prompt.tweet_id}')" style="cursor:pointer;">${prompt.title}</h3>
+                        <p class="prompt-preview" onclick="openModal('${prompt.tweet_id}')" style="cursor:pointer;">${prompt.prompt_text}</p>
+
+                    </div>
+                    <div class="action-buttons" style="padding: 10px 14px; display: flex; gap: 8px;">
+                            <button class="btn btn-share" onclick="event.stopPropagation(); sharePrompt('${prompt.id}')" title="Share">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                            </button>
+                            <a href="https://sparki.io/create" target="_blank" class="btn btn-primary" onclick="navigator.clipboard.writeText('${prompt.prompt_text.replace(/'/g, "\\'")}')">Try &#x26A1;</a>
+                        </div>
+                </article>
+            `;
+        }
+
+        function updateStats() {
+            const total = prompts.length;
+            const categories = [...new Set(prompts.map(p => p.category))];
+            const creators = [...new Set(prompts.map(p => p.author.screen_name))];
+            const counts = {};
+            prompts.forEach(p => {
+                counts[p.category] = (counts[p.category] || 0) + 1;
+            });
+
+            document.getElementById('hero-prompt-count').textContent = total;
+            document.getElementById('hero-category-count').textContent = categories.length;
+            document.getElementById('hero-creator-count').textContent = creators.length;
+
+            document.getElementById('filter-count-all').textContent = total;
+            const catMap = {
+                'video-generation': 'filter-count-video-generation',
+                'product-photography': 'filter-count-product-photography',
+                'cinematic': 'filter-count-cinematic',
+                'image-generation': 'filter-count-image-generation',
+                'character-design': 'filter-count-character-design'
+            };
+            for (const [cat, elId] of Object.entries(catMap)) {
+                const el = document.getElementById(elId);
+                if (el) el.textContent = counts[cat] || 0;
+            }
+        }
+
+        function renderPrompts(filter = 'all') {
+            updateStats();
+            const grid = document.getElementById('prompt-grid');
+            const title = document.getElementById('content-title');
+            const searchTerm = (document.getElementById('search-input')?.value || '').toLowerCase();
+            const sortValue = document.querySelector('.sort-select')?.value || 'recent';
+
+            let filtered = filter === 'all'
+                ? [...prompts]
+                : prompts.filter(p => p.category === filter);
+
+            if (searchTerm) {
+                filtered = filtered.filter(p =>
+                    p.title.toLowerCase().includes(searchTerm) ||
+                    p.prompt_text.toLowerCase().includes(searchTerm) ||
+                    p.author.name.toLowerCase().includes(searchTerm) ||
+                    (p.notes && p.notes.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (sortValue === 'popular') {
+                filtered.sort((a, b) => (b.engagement.likes + b.engagement.retweets + b.engagement.replies) - (a.engagement.likes + a.engagement.retweets + a.engagement.replies));
+            } else if (sortValue === 'longest') {
+                filtered.sort((a, b) => b.prompt_text.length - a.prompt_text.length);
+            }
+
+            const label = filter === 'all' ? 'All Prompts' : filter.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            title.textContent = searchTerm ? `Search: "${searchTerm}" (${filtered.length})` : label;
+            grid.innerHTML = filtered.length
+                ? filtered.map(createPromptCard).join('')
+                : '<div class="empty-state"><h3>No prompts found</h3><p>Try a different search term</p></div>';
+        }
+
+        function handleSearch() {
+            renderPrompts(document.querySelector('#category-filters .active')?.dataset.category || 'all');
+        }
+
+        function handleSort() {
+            renderPrompts(document.querySelector('#category-filters .active')?.dataset.category || 'all');
+        }
+
+        function toggleDrawer() {
+            const sidebar = document.getElementById('filter-sidebar');
+            const overlay = document.getElementById('filter-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function closeDrawer() {
+            const sidebar = document.getElementById('filter-sidebar');
+            const overlay = document.getElementById('filter-overlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        document.getElementById('filter-overlay').addEventListener('click', closeDrawer);
+
+        function sharePrompt(id) {
+            const url = `https://sparki.io/prompt/${id}`;
+            if (navigator.share) {
+                navigator.share({ title: 'Veo Prompt', url });
+            } else {
+                navigator.clipboard.writeText(url);
+            }
+        }
+
+        function openModal(tweetId) {
+            const prompt = prompts.find(p => p.tweet_id === tweetId);
+            if (!prompt) return;
+            window.currentPromptText = prompt.prompt_text;
+
+            document.getElementById('modal-avatar').textContent = prompt.author.name[0];
+            document.getElementById('modal-author-name').textContent = prompt.author.name;
+            document.getElementById('modal-author-handle').textContent = '@' + prompt.author.screen_name;
+            document.getElementById('modal-category').textContent = prompt.category.replace('-', ' ');
+            document.getElementById('modal-title').textContent = prompt.title;
+            document.getElementById('modal-prompt-text').textContent = prompt.prompt_text;
+            document.getElementById('modal-notes').textContent = prompt.notes || 'No additional notes.';
+            document.getElementById('modal-likes').textContent = formatNumber(prompt.engagement.likes);
+            document.getElementById('modal-retweets').textContent = formatNumber(prompt.engagement.retweets);
+            document.getElementById('modal-replies').textContent = formatNumber(prompt.engagement.replies);
+            document.getElementById('modal-followers').textContent = formatNumber(prompt.author.followers);
+            document.getElementById('modal-view-original').href = prompt.url;
+
+            document.getElementById('modal-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function copyPrompt() {
+            const text = window.currentPromptText || '';
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.modal-footer .btn-primary');
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = original; }, 1500);
+            });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Category filter handlers
+        document.querySelectorAll('#category-filters button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#category-filters button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderPrompts(btn.dataset.category);
+            });
+        });
+
+        // Sort handlers
+        document.querySelectorAll('.filter-list:nth-child(2) button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-list:nth-child(2) button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Initial render
+        renderPrompts();
+
+        // Typing animation
+        const titleEl = document.getElementById('typing-title');
+        const words = ['⚡ Veo Prompt Library', '✨ Handpicked Video Prompts', '🔥 Best Veo Prompts'];
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let cursorVisible = true;
+
+        function typeEffect() {
+            const current = words[wordIndex];
+            if (isDeleting) {
+                charIndex--;
+                titleEl.innerHTML = current.substring(0, charIndex) + '<span class="typing-cursor"></span>';
+            } else {
+                charIndex++;
+                titleEl.innerHTML = current.substring(0, charIndex) + '<span class="typing-cursor"></span>';
+            }
+
+            let speed = isDeleting ? 30 : 60;
+            if (!isDeleting && charIndex === current.length) {
+                speed = 2000;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                wordIndex = (wordIndex + 1) % words.length;
+                speed = 300;
+            }
+            setTimeout(typeEffect, speed);
+        }
+        typeEffect();
+    </script>
+</body>
+</html>
