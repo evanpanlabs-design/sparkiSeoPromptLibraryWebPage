@@ -1020,12 +1020,7 @@
             <div class="filter-section">
                 <div class="filter-title">Category</div>
                 <ul class="filter-list" id="category-filters">
-                    <li><button class="filter-btn active" data-category="all">All <span class="filter-count" id="filter-count-all">0</span></button></li>
-                    <li><button class="filter-btn" data-category="video-generation">Video Generation <span class="filter-count" id="filter-count-video-generation">0</span></button></li>
-                    <li><button class="filter-btn" data-category="product-photography">Product Photography <span class="filter-count" id="filter-count-product-photography">0</span></button></li>
-                    <li><button class="filter-btn" data-category="cinematic">Cinematic <span class="filter-count" id="filter-count-cinematic">0</span></button></li>
-                    <li><button class="filter-btn" data-category="image-generation">Image Generation <span class="filter-count" id="filter-count-image-generation">0</span></button></li>
-                    <li><button class="filter-btn" data-category="character-design">Character Design <span class="filter-count" id="filter-count-character-design">0</span></button></li>
+                    <li id="category-buttons-root"></li>
                 </ul>
             </div>
             <div class="filter-section">
@@ -1296,17 +1291,17 @@
         function createPromptCard(prompt) {
             return `
                 <article class="prompt-card">
-                    <div class="card-image" onclick="openModal('${prompt.tweet_id}')" style="cursor:pointer;">
-                        <img src="generated_images/${prompt.id}.png" alt="Prompt preview" loading="lazy" onerror="this.src='https://picsum.photos/seed/${prompt.tweet_id}/550/307'">
+                    <div class="card-image" onclick="window.location.href='/prompts/${prompt.slug}.html'" style="cursor:pointer;">
+                        <img src="/generated_images/${prompt.id}.png" alt="Prompt preview" loading="lazy" onerror="this.src='https://picsum.photos/seed/${prompt.tweet_id}/550/307'">
                     </div>
                     <div class="card-body">
                         <span class="prompt-category" data-category="${prompt.category}">${prompt.category.replace('-', ' ')}</span>
-                        <h3 class="prompt-title" onclick="openModal('${prompt.tweet_id}')" style="cursor:pointer;">${prompt.title}</h3>
-                        <p class="prompt-preview" onclick="openModal('${prompt.tweet_id}')" style="cursor:pointer;">${prompt.prompt_text}</p>
+                        <h3 class="prompt-title" onclick="window.location.href='/prompts/${prompt.slug}.html'" style="cursor:pointer;">${prompt.title}</h3>
+                        <p class="prompt-preview" onclick="window.location.href='/prompts/${prompt.slug}.html'" style="cursor:pointer;">${prompt.prompt_text}</p>
 
                     </div>
                     <div class="action-buttons" style="padding: 10px 14px; display: flex; gap: 8px;">
-                            <button class="btn btn-share" onclick="event.stopPropagation(); sharePrompt('${prompt.id}')" title="Share">
+                            <button class="btn btn-share" onclick="event.stopPropagation(); sharePrompt('${prompt.slug}')" title="Share">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                             </button>
                             <a href="https://sparki.io/create" target="_blank" class="btn btn-primary" onclick="navigator.clipboard.writeText('${prompt.prompt_text.replace(/'/g, "\\'")}')">Try &#x26A1;</a>
@@ -1315,7 +1310,7 @@
             `;
         }
 
-        function updateStats() {
+        function updateStats(activeCategory = 'all') {
             const total = prompts.length;
             const categories = [...new Set(prompts.map(p => p.category))];
             const creators = [...new Set(prompts.map(p => p.author.screen_name))];
@@ -1328,22 +1323,28 @@
             document.getElementById('hero-category-count').textContent = categories.length;
             document.getElementById('hero-creator-count').textContent = creators.length;
 
-            document.getElementById('filter-count-all').textContent = total;
-            const catMap = {
-                'video-generation': 'filter-count-video-generation',
-                'product-photography': 'filter-count-product-photography',
-                'cinematic': 'filter-count-cinematic',
-                'image-generation': 'filter-count-image-generation',
-                'character-design': 'filter-count-character-design'
-            };
-            for (const [cat, elId] of Object.entries(catMap)) {
-                const el = document.getElementById(elId);
-                if (el) el.textContent = counts[cat] || 0;
+            // Build category buttons dynamically
+            const sortedCats = categories.sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+            let buttonsHtml = `<button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" data-category="all">All <span class="filter-count" id="filter-count-all">${total}</span></button>`;
+            for (const cat of sortedCats) {
+                const displayName = cat.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                const count = counts[cat] || 0;
+                buttonsHtml += `<button class="filter-btn ${activeCategory === cat ? 'active' : ''}" data-category="${cat}">${displayName} <span class="filter-count" id="filter-count-${cat}">${count}</span></button>`;
             }
+            document.getElementById('category-buttons-root').innerHTML = buttonsHtml;
+
+            // Re-attach click handlers for dynamically generated buttons
+            document.querySelectorAll('#category-filters button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#category-filters button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderPrompts(btn.dataset.category);
+                });
+            });
         }
 
         function renderPrompts(filter = 'all') {
-            updateStats();
+            updateStats(filter);
             const grid = document.getElementById('prompt-grid');
             const title = document.getElementById('content-title');
             const searchTerm = (document.getElementById('search-input')?.value || '').toLowerCase();
@@ -1399,8 +1400,8 @@
 
         document.getElementById('filter-overlay').addEventListener('click', closeDrawer);
 
-        function sharePrompt(id) {
-            const url = `https://sparki.io/prompt/${id}`;
+        function sharePrompt(slug) {
+            const url = `${window.location.origin}/prompts/${slug}.html`;
             if (navigator.share) {
                 navigator.share({ title: 'Veo Prompt', url });
             } else {
@@ -1408,8 +1409,8 @@
             }
         }
 
-        function openModal(tweetId) {
-            const prompt = prompts.find(p => p.tweet_id === tweetId);
+        function openModal(slug) {
+            const prompt = prompts.find(p => p.slug === slug);
             if (!prompt) return;
             window.currentPromptText = prompt.prompt_text;
 
