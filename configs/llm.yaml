@@ -1,0 +1,33 @@
+llm:
+  provider: "gemini"  # "minimax" or "gemini"
+
+  # MiniMax settings (provider == "minimax")
+  api_base: "https://api.minimaxi.com/v1"
+  api_key_env: "OPENAI_API_KEY"
+  default_model: "gemini-3.5-flash"
+
+  # Vertex AI Gemini settings (provider == "gemini")
+  gemini:
+    project: "sparki-op"
+    location: "global"
+    default_model: "gemini-3.5-flash"
+
+  timeouts:
+    extraction: 60
+    scoring: 45
+    query_expansion: 30
+
+  concurrency:
+    extraction: 15
+    scoring: 10
+    query_expansion: 1
+
+  routes:
+    fast_cheap:
+      model: "gemini-3.5-flash"
+      max_tokens: 200
+      temperature: 0.0
+    high_quality:
+      model: "gemini-3.5-flash"
+      max_tokens: 500
+      temperature: 0.0

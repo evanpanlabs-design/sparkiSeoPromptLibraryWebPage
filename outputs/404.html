@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found — Veo Prompt Library</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0fdff;
+            color: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        .container { max-width: 480px; }
+        h1 { font-size: 72px; font-weight: 700; color: #3B82F6; margin-bottom: 8px; }
+        p { font-size: 16px; color: #404040; margin-bottom: 24px; line-height: 1.6; }
+        a { display: inline-block; padding: 12px 28px; background: #3B82F6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; transition: background 0.15s; }
+        a:hover { background: #2563eb; }
+        .url-display { font-size: 13px; color: #737373; margin-bottom: 20px; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>404</h1>
+        <p>The page you're looking for doesn't exist or has been moved.</p>
+        <div class="url-display" id="url-display"></div>
+        <a href="/">← Back to Prompt Library</a>
+    </div>
+    <script>
+        document.getElementById('url-display').textContent = window.location.href;
+        // If the URL contains too many /prompts/, redirect to the correct one
+        var path = window.location.pathname;
+        var match = path.match(/\/prompts\/([^/]+\.html)$/);
+        if (match) {
+            // Extract the actual slug and redirect
+            window.location.replace('/prompts/' + match[1]);
+        }
+    </script>
+</body>
+</html>

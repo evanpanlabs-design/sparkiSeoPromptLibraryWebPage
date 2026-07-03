@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veo Prompt Library — Sparki</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f0fdff;
+            --bg-tertiary: #e6f7ff;
+            --text-primary: #0a0a0a;
+            --text-secondary: #404040;
+            --text-tertiary: #737373;
+            --border: #d0e8ff;
+            --border-strong: #a5d4ff;
+            --accent: #3B82F6;
+            --accent-light: #A5FFFF;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --pink: #ffc0cb;
+            --pink-light: #fff0f3;
+            --yellow-light: #fffce8;
+            --tag-bg: #e6f7ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 48px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+
+        .logo a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a.active {
+            color: var(--text-primary);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 48px 60px;
+            text-align: center;
+            border-bottom: 2px solid var(--text-primary);
+            background: linear-gradient(-45deg,
+                #e6f7ff 0%,
+                #fff0f3 20%,
+                #fff8e6 40%,
+                #f0f8ff 60%,
+                #e6f7ff 80%,
+                #fff0f3 100%
+            );
+            background-size: 300% 300%;
+            animation: gradientFlow 8s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+        }
+
+        .hero h1::before {
+            content: '';
+        }
+
+        .hero h1 span::before {
+            content: '';
+        }
+
+        #typing-title {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+            min-height: 44px;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 480px;
+            margin: 0 auto 32px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 48px;
+            gap: 48px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 360px;
+            height: 100vh;
+            background: white;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease, left 0.3s ease;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 44px;
+            background: white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            z-index: 150;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-toggle::before {
+            content: '>>';
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+        }
+
+        .sidebar.open ~ .sidebar-toggle::before {
+            content: '<<';
+        }
+
+        .sidebar.open ~ .sidebar-toggle {
+            left: 360px;
+        }
+
+        .filter-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .filter-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-content {
+            padding: 20px 24px;
+        }
+
+        .filter-section {
+            margin-bottom: 32px;
+        }
+
+        .filter-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .filter-list {
+            list-style: none;
+        }
+
+        .filter-list li {
+            margin-bottom: 8px;
+        }
+
+        .filter-list button {
+            width: 100%;
+            text-align: left;
+            padding: 10px 14px 10px 32px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s;
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .filter-list button::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--border-strong);
+        }
+
+        .filter-list button[data-category="video-generation"]::before { background: var(--accent); }
+        .filter-list button[data-category="product-photography"]::before { background: #f472b6; }
+        .filter-list button[data-category="cinematic"]::before { background: #fbbf24; border-color: #f59e0b; }
+        .filter-list button[data-category="image-generation"]::before { background: #a855f7; border-color: #9333ea; }
+        .filter-list button[data-category="character-design"]::before { background: #22c55e; border-color: #16a34a; }
+
+        .filter-list button:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-list button.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .filter-list button:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-count {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .filter-list button.active .filter-count {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .content-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .sort-select {
+            padding: 8px 32px 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        /* Prompt Grid - Masonry Layout */
+        .prompt-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* Prompt Card */
+        .prompt-card {
+            border: 1px solid #808080;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            background: white;
+            position: relative;
+        }
+
+        .prompt-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-image {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .prompt-card:hover .card-image img {
+            transform: scale(1.03);
+        }
+
+        .card-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 14px;
+            font-weight: 900;
+            padding: 6px 14px;
+            color: white;
+            transform: rotate(3deg);
+            animation: wiggle 2s ease-in-out infinite;
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 2px;
+        }
+
+        .card-badge.red { background: #ef4444; }
+        .card-badge.yellow { background: #f59e0b; color: white; }
+        .card-badge.blue { background: #3b82f6; }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(3deg); }
+            25% { transform: rotate(-3deg) scale(1.08); }
+            75% { transform: rotate(6deg); }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--text-primary);
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+
+        .card-header {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .author-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .author-handle {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .card-body {
+            padding: 12px 14px;
+        }
+
+        .prompt-category {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            color: white;
+            background: var(--accent);
+        }
+
+        .prompt-category[data-category="video-generation"] {
+            background: var(--accent);
+        }
+
+        .prompt-category[data-category="product-photography"] {
+            background: #f472b6;
+        }
+
+        .prompt-category[data-category="cinematic"] {
+            background: #fbbf24;
+            color: var(--text-primary);
+        }
+
+        .prompt-category[data-category="image-generation"] {
+            background: #a855f7;
+        }
+
+        .prompt-category[data-category="character-design"] {
+            background: #22c55e;
+        }
+
+        .prompt-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .prompt-preview {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            justify-content: flex-end;
+        }
+
+        .view-more-btn {
+            display: block;
+            width: 100%;
+            padding: 6px;
+            margin-top: 6px;
+            border: 1px solid var(--border);
+            background: white;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .view-more-btn:hover {
+            border-color: var(--border-strong);
+            color: var(--text-primary);
+        }
+
+        .card-footer {
+            padding: 10px 14px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .author-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .author-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            padding-top: 1px;
+        }
+
+        .author-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .author-divider {
+            width: 1px;
+            align-self: stretch;
+            background: var(--text-tertiary);
+            opacity: 0.3;
+            flex-shrink: 0;
+        }
+
+        .author-stats-row1 {
+            display: flex;
+            gap: 12px;
+        }
+
+        .author-stats-row2 {
+            display: flex;
+        }
+
+        .author-name {
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .author-handle {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            line-height: 1.2;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .followers-item {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-tertiary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            outline: none;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--border-strong);
+            background: var(--bg-secondary);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border: 2px solid var(--accent);
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+            color: white;
+        }
+
+        .btn-share {
+            width: 40px;
+            min-width: 40px;
+            height: 36px;
+            padding: 0;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+
+        .btn-share:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            visibility: hidden;
+            opacity: 0;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 680px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            scrollbar-gutter: stable;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .modal::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 3px;
+        }
+
+        .modal-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .modal-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-author .author-avatar {
+            width: 44px;
+            height: 44px;
+        }
+
+        .modal-author .author-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .modal-author .author-handle {
+            font-size: 13px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .modal-category {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--tag-bg);
+            border-radius: 4px;
+        }
+
+        .modal-title {
+            padding: 20px 28px 0;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .modal-section {
+            padding: 20px 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+        }
+
+        .modal-prompt-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .modal-notes {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .modal-meta {
+            display: flex;
+            gap: 24px;
+            padding: 16px 28px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .modal-meta-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-meta-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-footer {
+            padding: 20px 28px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 48px;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        footer p {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        footer a {
+            color: var(--text-tertiary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--text-primary);
+        }
+
+        footer svg {
+            transition: color 0.15s;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+                padding: 24px;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 280px;
+                height: 100vh;
+                z-index: 200;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle {
+                display: none !important;
+            }
+
+            .filter-overlay.active {
+                display: block;
+            }
+
+            nav {
+                padding: 16px 24px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 48px 24px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .stats {
+                gap: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="https://sparki.io" class="logo"><img src="https://sparki.io/_next/image?url=%2Flogo-text.svg&w=256&q=75" alt="sparki" height="24" style="vertical-align: middle;"></a>
+        <ul class="nav-links">
+            <li><a href="https://sparki.io">Try Sparki</a></li>
+            <li><a href="#" class="active">Prompt Library</a></li>
+        </ul>
+    </nav>
+
+    <div class="filter-overlay" id="filter-overlay"></div>
+
+    <header class="hero">
+        <h1><div id="typing-title"></div></h1>
+        <p>A collection of proven prompts for Google Veo, scraped from creators and organized for easy discovery.</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="hero-prompt-count">0</div>
+                <div class="stat-label">Prompts</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="hero-category-count">0</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="hero-creator-count">0</div>
+                <div class="stat-label">Creators</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <aside class="sidebar" id="filter-sidebar">
+            <div class="sidebar-content">
+            <div class="filter-section">
+                <div class="filter-title">Category</div>
+                <ul class="filter-list" id="category-filters">
+                    <li id="category-buttons-root"></li>
+                </ul>
+            </div>
+            <div class="filter-section">
+                <div class="filter-title">Sort By</div>
+                <ul class="filter-list">
+                    <li><button class="active" onclick="document.querySelector('.sort-select').value='recent';handleSort()">Most Recent</button></li>
+                    <li><button onclick="document.querySelector('.sort-select').value='popular';handleSort()">Most Popular</button></li>
+                    <li><button onclick="document.querySelector('.sort-select').value='longest';handleSort()">Longest Prompt</button></li>
+                </ul>
+            </div>
+            </div>
+        </aside>
+        <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleDrawer()"></button>
+
+        <section class="content">
+            <div class="content-header">
+                <h2 class="content-title" id="content-title">All Prompts</h2>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input type="text" id="search-input" placeholder="Search prompts..." oninput="handleSearch()" style="padding: 8px 14px; border: 2px solid var(--text-primary); border-radius: 6px; font-size: 14px; width: 200px; transition: all 0.2s; outline: none;">
+                    <select class="sort-select" onchange="handleSort(this.value)">
+                        <option value="recent">Most Recent</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="longest">Longest Prompt</option>
+                    </select>
+                </div>
+            </div>
+            <div class="prompt-grid" id="prompt-grid">
+                <!-- Cards will be injected by JS -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 16px;">
+            <a href="https://x.com/Sparki_ai" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://www.youtube.com/@sparki_loves_editing/" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/sparki_ai/" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+            </a>
+            <a href="https://www.tiktok.com/@sparki_ai" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+            </a>
+            <a href="https://discord.com/invite/3cWs84Jza8" target="_blank" style="color: var(--text-tertiary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+            </a>
+        </div>
+        <p>© 2026 Sparkview Tech Pte. Ltd. All rights reserved.</p>
+        <p>Part of <a href="https://www.sparki.io">Sparki</a> — AI Video Remix & Editing</p>
+    </footer>
+
+    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <div class="modal-author">
+                    <div class="author-avatar" id="modal-avatar"></div>
+                    <div>
+                        <div class="author-name" id="modal-author-name"></div>
+                        <div class="author-handle" id="modal-author-handle"></div>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div style="padding: 20px 28px 0;">
+                <span class="modal-category" id="modal-category"></span>
+                <h2 class="modal-title" id="modal-title"></h2>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-label">Prompt</div>
+                <div class="modal-prompt-text" id="modal-prompt-text"></div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-label">Notes</div>
+                <div class="modal-notes" id="modal-notes"></div>
+            </div>
+            <div class="modal-meta">
+                <div class="modal-meta-item">
+                    <span class="modal-meta-value" id="modal-likes"></span>
+                    <span class="modal-meta-label">Likes</span>
+                </div>
+                <div class="modal-meta-item">
+                    <span class="modal-meta-value" id="modal-retweets"></span>
+                    <span class="modal-meta-label">Retweets</span>
+                </div>
+                <div class="modal-meta-item">
+                    <span class="modal-meta-value" id="modal-replies"></span>
+                    <span class="modal-meta-label">Replies</span>
+                </div>
+                <div class="modal-meta-item">
+                    <span class="modal-meta-value" id="modal-followers"></span>
+                    <span class="modal-meta-label">Followers</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="modal-view-original" target="_blank" class="btn btn-outline">View on X</a>
+                <a href="https://sparki.io/create" target="_blank" class="btn btn-primary" onclick="navigator.clipboard.writeText(window.currentPromptText||'')">Try ⚡</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const prompts = [
+            {
+                "id": 1,
+                "tweet_id": "2044440575009771536",
+                "url": "https://x.com/Strength04_X/status/2044440575009771536",
+                "category": "video-generation",
+                "title": "Lipton Mountain Volcano",
+                "prompt_text": "A colossal mountain shaped like a ceramic Lipton teacup, with glowing lava flowing down the sides like steeped tea. The Lipton logo is prominently displayed and large, carved clearly into the rocky surface and illuminated by the light of the lava. Steam rises from the top naturally, as if the mountain is brewing tea. The surrounding clouds and valleys add a dreamy quality, while a serene lake reflects the entire scene. Highly detailed, fantasy realism with volumetric fog and a strong product presence.",
+                "notes": "Nano Banana 2 prompt for Google Veo 3.1, product integration with Lipton brand",
+                "author": { "name": "𝐌", "screen_name": "Strength04_X", "followers": 14500 },
+                "engagement": { "likes": 79, "retweets": 4, "replies": 42 }
+            },
+            {
+                "id": 2,
+                "tweet_id": "2045329783958176075",
+                "url": "https://x.com/AiwithLariab/status/2045329783958176075",
+                "category": "video-generation",
+                "title": "Woman on Mountain Swing - Golden Hour",
+                "prompt_text": "A young woman sits on a wooden swing in a mountain landscape during golden hour. Soft sunlight glows across her face as she smiles with eyes closed, enjoying the breeze. Her scarf flows gracefully in the wind, and her hair moves naturally. The background shows blurred mountains and soft sky. Cinematic, dreamy, ultra-realistic, warm tones, peaceful atmosphere.\n\nMotion:\nSwing gently moving → hair & scarf flowing → soft sunlight flicker\n\nCamera:\nSlow side angle → slight push-in\n\nAudio (No Dialogue):\nSoft instrumental (flute + piano) + light wind ambience",
+                "notes": "Created using Google Flow Labs/VEO-2or3",
+                "author": { "name": "Lariab Fatima", "screen_name": "AiwithLariab", "followers": 1806 },
+                "engagement": { "likes": 82, "retweets": 4, "replies": 61 }
+            },
+            {
+                "id": 3,
+                "tweet_id": "2053857256509243497",
+                "url": "https://x.com/Mho_23/status/2053857256509243497",
+                "category": "cinematic",
+                "title": "Professor Writing Trigonometric Proof",
+                "prompt_text": "A professor writes out a mathematical proof for trigonometric identities on a traditional chalkboard, explaining the step he is currently on in the equation.",
+                "notes": null,
+                "author": { "name": "Miko", "screen_name": "Mho_23", "followers": 25500 },
+                "engagement": { "likes": 461, "retweets": 42, "replies": 54 }
+            },
+            {
+                "id": 4,
+                "tweet_id": "2043753023004954753",
+                "url": "https://x.com/zazzygfx/status/2043753023004954753",
+                "category": "cinematic",
+                "title": "3D Crystal Glass Logo in Clouds",
+                "prompt_text": "A premium 3D stylized version of attached logo, rendered as thick, translucent crystal glass with high refraction. The object is floating amidst fluffy, realistic white cumulus clouds against a bright, clear blue sky. Soft natural sunlight creates bright caustic reflections and rainbow dispersion within the glass. Ethereal, airy, and highly polished 3D aesthetic",
+                "notes": "Created with Nano Banana Pro, animated with Veo 3.1 lite. References attached logo asset.",
+                "author": { "name": "Zazzy", "screen_name": "zazzygfx", "followers": 13100 },
+                "engagement": { "likes": 401, "retweets": 40, "replies": 8 }
+            },
+            {
+                "id": 5,
+                "tweet_id": "2050743570404098190",
+                "url": "https://x.com/SyntheSarah/status/2050743570404098190",
+                "category": "video-generation",
+                "title": "Surviving the Chaos",
+                "prompt_text": "A cinematic action sequence set in a post-apocalyptic, ruined city filled with crumbling skyscrapers and piles of debris. The video begins with a muscular man in dark, tactical clothing levitating or being propelled upward as the ground beneath him explodes into dust and shattered concrete. The camera then cuts to a fast-paced combat scene where the man fights a woman with a glowing, cybernetic robotic arm; they exchange rapid strikes and a powerful high kick. This is followed by a shot of a shirtless, powerful man standing amidst a massive explosion of fire and flying rocks, his arm raised in a triumphant or power-charging gesture. The video ends with a close-up of a determined-looking woman with long black hair and a mechanical arm, standing against the backdrop of the devastated city. The entire video has a gritty, sepia-toned cinematic color grade with high-contrast lighting and intense motion.",
+                "notes": "Generated with Veo 3.1 by @yapper_so",
+                "author": { "name": "Sarah", "screen_name": "SyntheSarah", "followers": 4919 },
+                "engagement": { "likes": 159, "retweets": 3, "replies": 40 }
+            },
+            {
+                "id": 6,
+                "tweet_id": "2024858343450501215",
+                "url": "https://x.com/AIwithkhan/status/2024858343450501215",
+                "category": "video-generation",
+                "title": "Burger Bed Bedroom Scene",
+                "prompt_text": "A minimal, naturally lit bedroom identical in composition and perspective to the reference. The camera is static, positioned at a slight diagonal angle near the foot-side of the bed, showing the full bed and surrounding floor, eye-level human POV, no camera movement. A solid bed constructed entirely from stacked burgers, including the frame and headboard, placed on a clean wooden floor beside a softly lit window with sheer curtains. A white girl wearing a casual t-shirt and shorts enters from the side, walks toward the burger bed, and sits down naturally. Movements are slow, grounded, and realistic, matching the reference pacing. She gently lifts a flexible blanket made entirely from burgers and carefully places it over her body exactly like in the reference video. The burger blanket behaves softly despite being burger-textured, with believable physics and weight distribution. ASMR-quality sound design synced precisely with the action: all audio must strictly match the physical material of burgers, including accurate contact, soft bun compression, lettuce rustle, sauce squish, friction, weight, and settling sounds wherever the person sits, moves, or places the burger blanket. No exaggerated or cinematic audio — only realistic, calming, material-accurate sounds. She lies down fully, adjusts the burger blanket once, then rests calmly with a neutral, peaceful expression.",
+                "notes": "Created using Google Gemini Veo 3.1",
+                "author": { "name": "Smiling Khan", "screen_name": "AIwithkhan", "followers": 7066 },
+                "engagement": { "likes": 70, "retweets": 11, "replies": 37 }
+            },
+            {
+                "id": 7,
+                "tweet_id": "2035279275725664507",
+                "url": "https://x.com/itsPolloAI/status/2035279275725664507",
+                "category": "video-generation",
+                "title": "Prehistoric Beast Desert Awakening",
+                "prompt_text": "A giant prehistoric beast wakes up in the desert. Opens its mouth. And roars.",
+                "notes": "Original prompt from a multi-model comparison test on Pollo platform comparing Seedance 1.5 Pro, Kling 3.0, Pollo 2.5, Sora 2, and Veo 3.1 video generation models.",
+                "author": { "name": "Pollo AI", "screen_name": "itsPolloAI", "followers": 81300 },
+                "engagement": { "likes": 184, "retweets": 47, "replies": 47 }
+            },
+            {
+                "id": 8,
+                "tweet_id": "2030507585330385394",
+                "url": "https://x.com/Strength04_X/status/2030507585330385394",
+                "category": "video-generation",
+                "title": "Slow-motion coffee pour commercial animation",
+                "prompt_text": "slow-motion coffee commercial animation where espresso is poured into a cup from above, coffee stream flowing smoothly while roasted coffee beans rotate around the cup in mid-air, steam rising naturally, rich crema forming on the surface of the coffee, dramatic dark café lighting highlighting the glossy coffee texture.",
+                "notes": "Generated with Google Veo 3.1 + Nano Banana 2 on Gemini",
+                "author": { "name": "𝐌", "screen_name": "Strength04_X", "followers": 14500 },
+                "engagement": { "likes": 90, "retweets": 10, "replies": 29 }
+            },
+            {
+                "id": 9,
+                "tweet_id": "2012851915017826758",
+                "url": "https://x.com/AIwithkhan/status/2012851915017826758",
+                "category": "video-generation",
+                "title": "Coca-Cola Time Freeze Pour",
+                "prompt_text": "Ultra-cinematic, photorealistic, 4K, slow motion video of a Coca-Cola can in a dark studio space with single spotlight and reflective black surface. Locked-off macro shot, no camera movement. Timeline: 00:00-00:02 - Chilled Coca-Cola can stands upright as condensation slowly drips with soft ambient hum. 00:02-00:05 - Can opens and cola bursts upward, freezing mid-air into a sculptural splash with sharp fizz followed by silence. 00:05-00:08 - Time resumes, liquid splashes back perfectly into the can with smooth liquid pour and satisfying fizz. Negative prompts: no people, no text overlays, no labels distortion.",
+                "notes": "AI video generation prompt for Google Veo 3",
+                "author": { "name": "Smiling Khan", "screen_name": "AIwithkhan", "followers": 7066 },
+                "engagement": { "likes": 95, "retweets": 22, "replies": 52 }
+            },
+            {
+                "id": 10,
+                "tweet_id": "2032346532284969267",
+                "url": "https://x.com/Strength04_X/status/2032346532284969267",
+                "category": "product-photography",
+                "title": "MOI SOI Popping Boba Strawberry Commercial",
+                "prompt_text": "Ultra-realistic commercial beverage advertising shot of a tall aluminum can labeled 'MOI SOI – POPPING BOBA STRAWBERRY' floating diagonally in mid-air. The can has a vibrant strawberry-pink design with glossy metallic reflections and fresh condensation droplets covering the surface to emphasize cold freshness. Surrounding the can is a dramatic splash explosion of bright strawberry juice forming dynamic fluid arcs and droplets frozen in motion. Floating around the splash are glossy red popping boba pearls, fresh strawberries (whole and sliced), and crystal-clear ice cubes suspended in the air. The background is a soft pink gradient with subtle mist and glowing highlights that enhance the refreshing fruity atmosphere. Cinematic studio lighting from the side and above creates sparkling reflections on the aluminum can, highlights on the juice splash, and soft shadows beneath the floating elements. High-end beverage advertising style, macro product photography, ultra-detailed textures, realistic liquid physics, shallow depth of field, photorealistic, 8K resolution.",
+                "notes": "Product photography prompt for strawberry boba beverage commercial with dynamic liquid splash effects and floating ingredients",
+                "author": { "name": "𝐌", "screen_name": "Strength04_X", "followers": 14500 },
+                "engagement": { "likes": 73, "retweets": 7, "replies": 17 }
+            },
+            {
+                "id": 11,
+                "tweet_id": "2036673434835468368",
+                "url": "https://x.com/MrDasOnX/status/2036673434835468368",
+                "category": "video-generation",
+                "title": "McDonald's Fries Explosion Ad Concept",
+                "prompt_text": "8-second photorealistic cinematic video of a red McDonald's fries box exploding into golden fries that rain down in slow motion, forming a perfect serving on the table. Style: photorealistic cinematic, high detail, fast food aesthetic, warm golden lighting. Camera: low-angle push-in on fries box (0-3s), then sweeping circular orbit upward (4-8s). Lighting: warm restaurant-style spotlights with golden glow, reflections on crispy fries. Room: modern fast food counter with red and yellow branding accents, glossy table surface. Elements: red McDonald's fries box (center frame), golden crispy fries bursting upward, salt crystals sparkling mid-air, ketchup and mustard droplets suspended, napkin drifting into frame, tray sliding into position below fries, Coca-Cola cup rolling gently into view. Motion: 0-2s fries box vibrates with fries bursting upward in golden arcs; 2-5s salt and condiments sparkle and tumble mid-air; 5-7s fries assemble neatly into box as tray slides below; 7-8s last fry lands softly on top. Ending: a perfectly filled McDonald's fries box rests on the tray, steaming with golden light. Keywords: 8 seconds, 16:9, McDonald's fries, crispy golden, salt sparkle, fast food aesthetic, slow motion, cinematic, high detail, photorealistic.",
+                "notes": "Ad concept for McDonald's-style fries explosion effect created with Veo 3.1 in Gemini App",
+                "author": { "name": "Mr Das", "screen_name": "MrDasOnX", "followers": 5526 },
+                "engagement": { "likes": 50, "retweets": 5, "replies": 12 }
+            },
+            {
+                "id": 12,
+                "tweet_id": "2038525426084323378",
+                "url": "https://x.com/Just_sharon7/status/2038525426084323378",
+                "category": "image-generation",
+                "title": "Children's Book Seed Watering Scene",
+                "prompt_text": "An open children's picture book rests on a wooden table, showing a whimsical illustration of a small brown seed in cartoon soil. A realistic human hand pours water from a tiny can, with a sparkling stream. Warm golden light, magical mood, overhead close-up, photorealistic, 4K.",
+                "notes": "Structured prompt with photorealistic style, warm golden lighting, magical mood, overhead close-up perspective at 4K resolution. Contains book, illustration, hand, and water elements.",
+                "author": { "name": "Sharon Riley", "screen_name": "Just_sharon7", "followers": 43000 },
+                "engagement": { "likes": 152, "retweets": 21, "replies": 34 }
+            },
+            {
+                "id": 13,
+                "tweet_id": "2013083809038905367",
+                "url": "https://x.com/Strength04_X/status/2013083809038905367",
+                "category": "character-design",
+                "title": "Cute Anthropomorphic Bunny Character 3D Render",
+                "prompt_text": "A full-body 3D render of a cute yet cool anthropomorphic bunny character, standing confidently in a minimalist studio setting. The bunny has soft dark-gray fur with realistic plush texture, long upright ears, and a small pink nose. It is wearing black sunglasses with thin gold frames, a loose black oversized T-shirt featuring a simple white skull icon on the chest, cream-colored knee-length shorts with subtle fabric ribbing, and light orange sneakers with white soles. Hands casually placed in pockets, relaxed street-style pose. Clean neutral gray background, soft diffused studio lighting, gentle shadows, centered composition. Ultra-detailed, high realism, Pixar-quality character design, modern toy-figure aesthetic, smooth depth of field, cinematic lighting, 4K render.",
+                "notes": "Posted via Twitter, referenced Google Veo 3.1 and Gemini Nano Pro",
+                "author": { "name": "𝐌", "screen_name": "Strength04_X", "followers": 14500 },
+                "engagement": { "likes": 201, "retweets": 14, "replies": 52 }
+            },
+            {
+                "id": 14,
+                "tweet_id": "2017460732938621180",
+                "url": "https://x.com/Naiknelofar788/status/2017460732938621180",
+                "category": "video-generation",
+                "title": "Wrapped vs Unwrapped Toffee - Boundaries Symbolism",
+                "prompt_text": "A quiet outdoor setting with a clean surface under soft natural light. Two identical toffees are placed side by side. Camera: slow zoom-in, mood: calm, neutral. One toffee is neatly wrapped in shiny paper. The other toffee is unwrapped, fully exposed. Camera: static close-up, mood: contrast, anticipation. Ants begin to appear and slowly crawl toward the unwrapped toffee, completely ignoring the wrapped one. Camera: macro shot, slow motion, mood: uneasy, revealing. More ants gather around the unwrapped toffee, covering it, while the wrapped toffee remains untouched and protected. Camera: top-down shot, mood: warning, realization. Text fades in: 'When you are too open, you can be used.' Camera: gentle fade, mood: reflective. Final frame focuses on the wrapped toffee standing alone, clean and intact. Text: 'Boundaries protect your value.' Camera: slow zoom-out, mood: empowering, calm. Style: cinematic, symbolic, minimal, realistic. Aspect ratio: 9:16. Audio: soft ambient piano background music with subtle nature ambience sound effects.",
+                "notes": "Tools: Gemini nano banana pro and Veo 3.1 - Symbolic metaphor about setting boundaries",
+                "author": { "name": "simeon-sanai", "screen_name": "Naiknelofar788", "followers": 32000 },
+                "engagement": { "likes": 95, "retweets": 15, "replies": 66 }
+            }
+        ] // PROMPTS_ARRAY_SENTINEL;
+
+        function formatNumber(num) {
+            return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num;
+        }
+
+        function createPromptCard(prompt) {
+            return `
+                <article class="prompt-card">
+                    <div class="card-image" onclick="window.location.href='/prompts/${prompt.slug}.html'" style="cursor:pointer;">
+                        <img src="/generated_images/${prompt.id}.png" alt="Prompt preview" loading="lazy" onerror="this.src='https://picsum.photos/seed/${prompt.tweet_id}/550/307'">
+                    </div>
+                    <div class="card-body">
+                        <span class="prompt-category" data-category="${prompt.category}">${prompt.category.replace('-', ' ')}</span>
+                        <h3 class="prompt-title" onclick="window.location.href='/prompts/${prompt.slug}.html'" style="cursor:pointer;">${prompt.title}</h3>
+                        <p class="prompt-preview" onclick="window.location.href='/prompts/${prompt.slug}.html'" style="cursor:pointer;">${prompt.prompt_text}</p>
+
+                    </div>
+                    <div class="action-buttons" style="padding: 10px 14px; display: flex; gap: 8px;">
+                            <button class="btn btn-share" onclick="event.stopPropagation(); sharePrompt('${prompt.slug}')" title="Share">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                            </button>
+                            <a href="https://sparki.io/create" target="_blank" class="btn btn-primary" onclick="navigator.clipboard.writeText('${prompt.prompt_text.replace(/'/g, "\\'")}')">Try &#x26A1;</a>
+                        </div>
+                </article>
+            `;
+        }
+
+        function updateStats(activeCategory = 'all') {
+            const total = prompts.length;
+            const categories = [...new Set(prompts.map(p => p.category))];
+            const creators = [...new Set(prompts.map(p => p.author.screen_name))];
+            const counts = {};
+            prompts.forEach(p => {
+                counts[p.category] = (counts[p.category] || 0) + 1;
+            });
+
+            document.getElementById('hero-prompt-count').textContent = total;
+            document.getElementById('hero-category-count').textContent = categories.length;
+            document.getElementById('hero-creator-count').textContent = creators.length;
+
+            // Build category buttons dynamically
+            const sortedCats = categories.sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+            let buttonsHtml = `<button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" data-category="all">All <span class="filter-count" id="filter-count-all">${total}</span></button>`;
+            for (const cat of sortedCats) {
+                const displayName = cat.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                const count = counts[cat] || 0;
+                buttonsHtml += `<button class="filter-btn ${activeCategory === cat ? 'active' : ''}" data-category="${cat}">${displayName} <span class="filter-count" id="filter-count-${cat}">${count}</span></button>`;
+            }
+            document.getElementById('category-buttons-root').innerHTML = buttonsHtml;
+
+            // Re-attach click handlers for dynamically generated buttons
+            document.querySelectorAll('#category-filters button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#category-filters button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderPrompts(btn.dataset.category);
+                });
+            });
+        }
+
+        function renderPrompts(filter = 'all') {
+            updateStats(filter);
+            const grid = document.getElementById('prompt-grid');
+            const title = document.getElementById('content-title');
+            const searchTerm = (document.getElementById('search-input')?.value || '').toLowerCase();
+            const sortValue = document.querySelector('.sort-select')?.value || 'recent';
+
+            let filtered = filter === 'all'
+                ? [...prompts]
+                : prompts.filter(p => p.category === filter);
+
+            if (searchTerm) {
+                filtered = filtered.filter(p =>
+                    p.title.toLowerCase().includes(searchTerm) ||
+                    p.prompt_text.toLowerCase().includes(searchTerm) ||
+                    p.author.name.toLowerCase().includes(searchTerm) ||
+                    (p.notes && p.notes.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (sortValue === 'popular') {
+                filtered.sort((a, b) => (b.engagement.likes + b.engagement.retweets + b.engagement.replies) - (a.engagement.likes + a.engagement.retweets + a.engagement.replies));
+            } else if (sortValue === 'longest') {
+                filtered.sort((a, b) => b.prompt_text.length - a.prompt_text.length);
+            }
+
+            const label = filter === 'all' ? 'All Prompts' : filter.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            title.textContent = searchTerm ? `Search: "${searchTerm}" (${filtered.length})` : label;
+            grid.innerHTML = filtered.length
+                ? filtered.map(createPromptCard).join('')
+                : '<div class="empty-state"><h3>No prompts found</h3><p>Try a different search term</p></div>';
+        }
+
+        function handleSearch() {
+            renderPrompts(document.querySelector('#category-filters .active')?.dataset.category || 'all');
+        }
+
+        function handleSort() {
+            renderPrompts(document.querySelector('#category-filters .active')?.dataset.category || 'all');
+        }
+
+        function toggleDrawer() {
+            const sidebar = document.getElementById('filter-sidebar');
+            const overlay = document.getElementById('filter-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function closeDrawer() {
+            const sidebar = document.getElementById('filter-sidebar');
+            const overlay = document.getElementById('filter-overlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        document.getElementById('filter-overlay').addEventListener('click', closeDrawer);
+
+        function sharePrompt(slug) {
+            const url = `${window.location.origin}/prompts/${slug}.html`;
+            if (navigator.share) {
+                navigator.share({ title: 'Veo Prompt', url });
+            } else {
+                navigator.clipboard.writeText(url);
+            }
+        }
+
+        function openModal(slug) {
+            const prompt = prompts.find(p => p.slug === slug);
+            if (!prompt) return;
+            window.currentPromptText = prompt.prompt_text;
+
+            document.getElementById('modal-avatar').textContent = prompt.author.name[0];
+            document.getElementById('modal-author-name').textContent = prompt.author.name;
+            document.getElementById('modal-author-handle').textContent = '@' + prompt.author.screen_name;
+            document.getElementById('modal-category').textContent = prompt.category.replace('-', ' ');
+            document.getElementById('modal-title').textContent = prompt.title;
+            document.getElementById('modal-prompt-text').textContent = prompt.prompt_text;
+            document.getElementById('modal-notes').textContent = prompt.notes || 'No additional notes.';
+            document.getElementById('modal-likes').textContent = formatNumber(prompt.engagement.likes);
+            document.getElementById('modal-retweets').textContent = formatNumber(prompt.engagement.retweets);
+            document.getElementById('modal-replies').textContent = formatNumber(prompt.engagement.replies);
+            document.getElementById('modal-followers').textContent = formatNumber(prompt.author.followers);
+            document.getElementById('modal-view-original').href = prompt.url;
+
+            document.getElementById('modal-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function copyPrompt() {
+            const text = window.currentPromptText || '';
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.modal-footer .btn-primary');
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = original; }, 1500);
+            });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Category filter handlers
+        document.querySelectorAll('#category-filters button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#category-filters button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderPrompts(btn.dataset.category);
+            });
+        });
+
+        // Sort handlers
+        document.querySelectorAll('.filter-list:nth-child(2) button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-list:nth-child(2) button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Initial render
+        renderPrompts();
+
+        // Typing animation
+        const titleEl = document.getElementById('typing-title');
+        const words = ['⚡ Veo Prompt Library', '✨ Handpicked Video Prompts', '🔥 Best Veo Prompts'];
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let cursorVisible = true;
+
+        function typeEffect() {
+            const current = words[wordIndex];
+            if (isDeleting) {
+                charIndex--;
+                titleEl.innerHTML = current.substring(0, charIndex) + '<span class="typing-cursor"></span>';
+            } else {
+                charIndex++;
+                titleEl.innerHTML = current.substring(0, charIndex) + '<span class="typing-cursor"></span>';
+            }
+
+            let speed = isDeleting ? 30 : 60;
+            if (!isDeleting && charIndex === current.length) {
+                speed = 2000;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                wordIndex = (wordIndex + 1) % words.length;
+                speed = 300;
+            }
+            setTimeout(typeEffect, speed);
+        }
+        typeEffect();
+    </script>
+</body>
+</html>

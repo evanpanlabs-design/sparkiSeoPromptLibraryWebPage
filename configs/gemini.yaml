@@ -1,0 +1,45 @@
+gemini:
+  project: "sparki-op"
+  location: "global"
+  gcs_bucket: "sparki-op-test"
+
+  image_models:
+    - "gemini-2.5-flash-image"
+    - "gemini-3-pro-image-preview"
+    - "gemini-3.1-flash-image-preview"
+
+  generation:
+    concurrency: 3
+    max_retries_per_model: 3
+    retry_delay_base: 5
+
+  style:
+    cinematic:
+      - "film grain"
+      - "anamorphic"
+      - "shallow depth of field"
+      - "f-stop"
+      - "35mm"
+      - "kodak portra 400"
+    character-design:
+      - "character sheet"
+      - "turnaround"
+      - "expression sheet"
+      - "animation ready"
+    product-photography:
+      - "product shot"
+      - "studio lighting"
+      - "white background"
+      - "high-key lighting"
+    video-generation:
+      - "motion blur"
+      - "dynamic pose"
+      - "cinematic frame"
+    image-generation:
+      - "detailed illustration"
+      - "digital art"
+      - "8k resolution"
+    other:
+      - "high quality"
+      - "vibrant colors"
+      - "professional composition"

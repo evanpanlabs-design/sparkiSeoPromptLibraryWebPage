@@ -1,0 +1,28 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Database
+*.db
+
+# Outputs (generated)
+outputs/last_crawl.json
+outputs/prompts.json
+outputs/apify_test_results.json
+outputs/cookies.json
+outputs/veo3-prompt-library.html
+outputs/generated_images/
+
+# IDE
+.vscode/
+.idea/
+
+# Temp
+test_*.py
+*_notes.md
+DEBUG_SUMMARY.md

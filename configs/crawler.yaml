@@ -1,0 +1,30 @@
+crawler:
+  type: "apify"  # "browser" or "apify"
+
+  scroll:
+    max_scrolls: 20
+    stale_threshold: 3
+    delay_ms: [100, 500]
+
+  timeouts:
+    page_goto: 60000
+    selector_wait: 15000
+    scroll_wait: 5000
+
+  proxy:
+    enabled: true
+    server: "http://127.0.0.1:7897"
+
+  cookie_age_days: 7
+
+  concurrency:
+    max_search_contexts: 3
+    max_enrichment_tasks: 5
+
+  apify:
+    actor_id: "nfp1fpt5gUlBwPcor"
+    api_token_env: "APIFY_API_TOKEN"  # token read from env var
+    timeout_ms: 600000  # 10 min — enough for $1 budget (~36 pages of 20 tweets)
+    max_retries: 2
+    retry_delay_s: 30
+    max_cost_usd: 10.0  # $10 per query — ~200 tweets per query for full run

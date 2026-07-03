@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Detail — Veo Prompt Library</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f0fdff;
+            --bg-tertiary: #e6f7ff;
+            --text-primary: #0a0a0a;
+            --text-secondary: #404040;
+            --text-tertiary: #737373;
+            --border: #d0e8ff;
+            --border-strong: #a5d4ff;
+            --accent: #3B82F6;
+            --accent-light: #A5FFFF;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --pink: #ffc0cb;
+            --pink-light: #fff0f3;
+            --yellow-light: #fffce8;
+            --tag-bg: #e6f7ff;
+            --badge-red: #ef4444;
+            --badge-yellow: #f59e0b;
+            --badge-blue: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        /* ── Navigation ── */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 48px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+
+        .nav-logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-logo .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .nav-center {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-center a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-center a:hover, .nav-center a.active {
+            color: var(--text-primary);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ── Detail Page Layout ── */
+        .detail-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        /* Back nav */
+        .back-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .back-nav a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .back-nav a:hover { color: var(--text-primary); }
+
+        /* ── Detail Header ── */
+        .detail-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+            align-items: start;
+        }
+
+        /* Cover Image */
+        .detail-image-wrap {
+            position: relative;
+        }
+
+        .detail-image {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #808080;
+            background: var(--bg-tertiary);
+            position: relative;
+        }
+
+        .detail-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* X link icon overlay on image */
+        .image-x-link {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.92);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.15s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .image-x-link:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .image-x-link svg {
+            color: var(--text-primary);
+        }
+
+        .detail-image-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 14px;
+            font-weight: 900;
+            padding: 6px 16px;
+            color: white;
+            transform: rotate(3deg);
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 2px;
+        }
+
+        .detail-image-badge.red { background: var(--badge-red); }
+        .detail-image-badge.yellow { background: var(--badge-yellow); color: white; }
+        .detail-image-badge.blue { background: var(--badge-blue); }
+
+        /* Info Panel */
+        .detail-info {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .detail-category {
+            display: inline-block;
+            align-self: flex-start;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            color: white;
+        }
+
+        .detail-category.video-generation { background: var(--accent); }
+        .detail-category.cinematic { background: #fbbf24; color: var(--text-primary); }
+        .detail-category.character-design { background: #22c55e; }
+        .detail-category.product-photography { background: #f472b6; }
+
+        .detail-title {
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+        }
+
+        /* Author block — 3 columns */
+        .detail-author {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .author-col {
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .author-col:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+
+        .author-col-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .author-col-handle {
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        .author-col-followers {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Stats row */
+        .detail-stats {
+            display: flex;
+            gap: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .detail-stat {
+            flex: 1;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .detail-stat:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+
+        .detail-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .detail-stat-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Action buttons */
+        .detail-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            border: 2px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .btn-outline {
+            background: white;
+            border-color: var(--border-strong);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        
+        /* ── Prompt Section ── */
+        .detail-section {
+            border-top: 1px solid var(--border);
+            padding-top: 32px;
+            margin-bottom: 40px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+        }
+
+        .prompt-text-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 24px;
+        }
+
+        .prompt-text-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* ── Recommendations ── */
+        .recommendations-section {
+            margin-top: 40px;
+        }
+
+        .recs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 20px;
+        }
+
+        .recs-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .recs-header span {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .recs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .rec-card {
+            border: 1px solid #808080;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .rec-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+
+        .rec-card-image {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+        }
+
+        .rec-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .rec-card-body {
+            padding: 10px 12px;
+        }
+
+        .rec-card-category {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 7px;
+            border-radius: 12px;
+            color: white;
+            background: var(--accent);
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        .rec-card-title {
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--text-primary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* ── Mobile Responsive ── */
+        @media (max-width: 768px) {
+            nav { padding: 14px 20px; }
+            .nav-center { display: none; }
+            .detail-header { grid-template-columns: 1fr; gap: 24px; }
+            .detail-title { font-size: 22px; }
+            .recs-grid { grid-template-columns: repeat(2, 1fr); }
+            .detail-page { padding: 24px 16px 60px; }
+        }
+
+        /* ── Toast notification ── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--text-primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 9999;
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ── Share modal ── */
+        .share-popover {
+            position: absolute;
+            top: 56px;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            min-width: 180px;
+            z-index: 200;
+            display: none;
+        }
+
+        .share-popover.open { display: block; }
+
+        .share-popover button {
+            width: 100%;
+            text-align: left;
+            padding: 9px 12px;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .share-popover button:hover { background: var(--bg-secondary); }
+
+        .share-popover .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+    <a href="../index.html" class="nav-logo">
+        <img src="https://sparki.io/_next/image?url=%2Flogo-text.svg&w=256&q=75" alt="Sparki" style="height:28px;">
+    </a>
+    <div class="nav-center">
+        <a href="../index.html">Prompts</a>
+        <a href="#" class="active">Prompt Detail</a>
+        <a href="#">Creators</a>
+    </div>
+    <div class="nav-right">
+        <span style="font-size:13px;color:var(--text-tertiary);">v3.2</span>
+    </div>
+</nav>
+
+<!-- Main Detail Page -->
+<div class="detail-page">
+
+    <!-- Back -->
+    <div class="back-nav">
+        <a id="back-link" href="../index.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back to Prompts
+        </a>
+    </div>
+
+    <!-- Header: Image + Info -->
+    <div class="detail-header">
+
+        <!-- Left: Cover Image -->
+        <div class="detail-image-wrap">
+            <div class="detail-image">
+                <img id="detail-image" src="https://picsum.photos/seed/2017460732938621180/1100/618" alt="Prompt cover">
+                <a id="image-x-link" href="#" target="_blank" class="image-x-link" title="View on X.com">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Right: Info -->
+        <div class="detail-info">
+
+            <span id="detail-category" class="detail-category video-generation">Video Generation</span>
+
+            <h1 id="detail-title" class="detail-title">Wrapped vs Unwrapped Toffee — Boundaries Symbolism</h1>
+
+            <!-- Author -->
+            <div class="detail-author">
+                <div class="author-col">
+                    <span class="author-col-name">simeon-sanai</span>
+                </div>
+                <div class="author-col">
+                    <span class="author-col-handle">@Naiknelofar788</span>
+                </div>
+                <div class="author-col">
+                    <span class="author-col-followers">32k followers</span>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="detail-stats">
+                <div class="detail-stat">
+                    <div class="detail-stat-value">95</div>
+                    <div class="detail-stat-label">Likes</div>
+                </div>
+                <div class="detail-stat">
+                    <div class="detail-stat-value">15</div>
+                    <div class="detail-stat-label">Retweets</div>
+                </div>
+                <div class="detail-stat">
+                    <div class="detail-stat-value">66</div>
+                    <div class="detail-stat-label">Replies</div>
+                </div>
+                <div class="detail-stat">
+                    <div class="detail-stat-value">32k</div>
+                    <div class="detail-stat-label">Followers</div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="detail-actions">
+                <a href="#" class="btn btn-primary" onclick="copyPromptText(event)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy Prompt
+                </a>
+                <div style="position:relative; flex: 1;">
+                    <a href="#" class="btn btn-outline" onclick="toggleSharePopover(event)" style="width:100%;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        Share
+                    </a>
+                    <div class="share-popover" id="share-popover">
+                        <button onclick="shareTwitter()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            Share on X
+                        </button>
+                        <button onclick="copyLink()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            Copy Link
+                        </button>
+                        <div class="divider"></div>
+                        <button onclick="tryPrompt()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            Try on Veo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+                    </div>
+    </div>
+
+    <!-- Prompt Section -->
+    <div class="detail-section">
+        <div class="section-label">Prompt</div>
+        <div class="prompt-text-block">
+            <div id="prompt-text-content" class="prompt-text-content">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="recommendations-section">
+        <div class="recs-header">
+            <h3>Same Category</h3>
+        </div>
+        <div class="recs-grid">
+            <div class="rec-card" onclick="alert('Navigate to prompt #7')">
+                <div class="rec-card-image">
+                    <img src="https://picsum.photos/seed/7/550/307" alt="">
+                </div>
+                <div class="rec-card-body">
+                    <span class="rec-card-category" style="background:#fbbf24;color:var(--text-primary)">Cinematic</span>
+                    <div class="rec-card-title">Cinematic Mountain Landscape with Dynamic Sky</div>
+                </div>
+            </div>
+            <div class="rec-card" onclick="alert('Navigate to prompt #22')">
+                <div class="rec-card-image">
+                    <img src="https://picsum.photos/seed/22/550/307" alt="">
+                </div>
+                <div class="rec-card-body">
+                    <span class="rec-card-category" style="background:var(--accent)">Video Generation</span>
+                    <div class="rec-card-title">Nature Documentary Opening Shot — Birds Eye</div>
+                </div>
+            </div>
+            <div class="rec-card" onclick="alert('Navigate to prompt #41')">
+                <div class="rec-card-image">
+                    <img src="https://picsum.photos/seed/41/550/307" alt="">
+                </div>
+                <div class="rec-card-body">
+                    <span class="rec-card-category" style="background:#f472b6">Product Photography</span>
+                    <div class="rec-card-title">Minimalist Product Shot — Soft Shadows Studio</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // ── Prompt data injected by build_html.py ──
+    const prompts_data = [
+    ] // PROMPTS_DATA_SENTINEL
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function copyPromptText(e) {
+        e.preventDefault();
+        navigator.clipboard.writeText(PROMPT_TEXT).then(() => showToast('Prompt copied to clipboard'));
+    }
+
+    function toggleSharePopover(e) {
+        e.preventDefault();
+        document.getElementById('share-popover').classList.toggle('open');
+    }
+
+    // Close popover on outside click
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.detail-actions')) {
+            document.getElementById('share-popover').classList.remove('open');
+        }
+    });
+
+    function shareTwitter() {
+        const text = encodeURIComponent('Check out this Veo prompt: ' + PROMPT_TEXT.slice(0, 100) + '...');
+        const url = encodeURIComponent(location.href);
+        window.open(`https://x.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+        document.getElementById('share-popover').classList.remove('open');
+    }
+
+    function copyLink() {
+        navigator.clipboard.writeText(location.href).then(() => showToast('Link copied to clipboard'));
+        document.getElementById('share-popover').classList.remove('open');
+    }
+
+    function tryPrompt() {
+        // Option A: External generator (placeholder)
+        window.open('https://aistudio.google.com/', '_blank');
+        document.getElementById('share-popover').classList.remove('open');
+    }
+
+    // ── Routing: read tweet_id from URL, find prompt by tweet_id ──
+    // Supports both /outputs/prompts/{tweet_id}.html and /prompts/{tweet_id}.html
+    function getTweetIdFromUrl() {
+        const path = location.pathname;
+        // Match /[outputs/]prompts/{tweet_id}.html
+        const match = path.match(/\/?(?:outputs\/)?prompts\/(\d+)\.html/);
+        return match ? match[1] : null;
+    }
+
+    function formatNumber(num) {
+        return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num;
+    }
+
+    function renderDetailPage(prompt) {
+        // Cover image
+        document.getElementById('detail-image').src = `../generated_images/${prompt.id}.png`;
+        document.getElementById('detail-image').onerror = function() {
+            this.src = `https://picsum.photos/seed/${prompt.tweet_id}/1100/618`;
+        };
+        // X link
+        document.getElementById('image-x-link').href = prompt.url;
+        // Category badge
+        const catEl = document.getElementById('detail-category');
+        catEl.textContent = prompt.category.replace('-', ' ');
+        catEl.className = 'detail-category ' + prompt.category;
+        // Title
+        document.getElementById('detail-title').textContent = prompt.title;
+        // Author
+        document.querySelector('.author-col-name').textContent = prompt.author.name;
+        document.querySelector('.author-col-handle').textContent = '@' + prompt.author.screen_name;
+        document.querySelector('.author-col-followers').textContent = formatNumber(prompt.author.followers) + ' followers';
+        // Stats
+        document.querySelectorAll('.detail-stat-value')[0].textContent = formatNumber(prompt.engagement.likes);
+        document.querySelectorAll('.detail-stat-value')[1].textContent = formatNumber(prompt.engagement.retweets);
+        document.querySelectorAll('.detail-stat-value')[2].textContent = formatNumber(prompt.engagement.replies);
+        document.querySelectorAll('.detail-stat-value')[3].textContent = formatNumber(prompt.author.followers);
+        // Prompt text
+        document.getElementById('prompt-text-content').textContent = prompt.prompt_text;
+        // Notes
+        document.getElementById('detail-notes').textContent = prompt.notes || 'No additional notes.';
+        // Back link
+        document.getElementById('back-link').href = '../index.html';
+        // Copy prompt
+        document.querySelector('.btn-primary').onclick = function(e) {
+            e.preventDefault();
+            navigator.clipboard.writeText(prompt.prompt_text).then(() => showToast('Prompt copied!'));
+        };
+        // Share twitter
+        document.querySelectorAll('#share-popover button')[0].onclick = function() {
+            const text = encodeURIComponent('Check out this Veo prompt: ' + prompt.prompt_text.slice(0, 100) + '...');
+            window.open(`https://x.com/intent/tweet?text=${text}&url=${encodeURIComponent(location.href)}`, '_blank');
+        };
+    }
+
+    function init() {
+        const tweetId = getTweetIdFromUrl();
+        if (!tweetId) {
+            document.body.innerHTML = '<div style="padding:40px;text-align:center;"><h2>Prompt not found</h2><a href="../index.html">Back to library</a></div>';
+            return;
+        }
+        const prompt = prompts_data.find(p => p.tweet_id === tweetId);
+        if (!prompt) {
+            document.body.innerHTML = '<div style="padding:40px;text-align:center;"><h2>Prompt not found</h2><a href="../index.html">Back to library</a></div>';
+            return;
+        }
+        renderDetailPage(prompt);
+    }
+
+    init();
+</script>
+
+</body>
+</html>

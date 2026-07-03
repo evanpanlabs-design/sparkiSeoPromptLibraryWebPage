@@ -1,0 +1,42 @@
+# Core dependencies for Sparki Agent
+# See CLAUDE.md and docs/02_DevGuide.md for setup instructions
+
+# Agent framework
+langgraph>=0.4.0
+
+# Web scraping
+playwright>=1.40.0
+twikit>=1.0.0
+
+# LLM / Gemini
+google-genai>=0.8.0
+google-cloud-storage>=2.0.0
+
+# Data processing
+pydantic>=2.0
+requests>=2.31.0
+pyyaml>=6.0
+
+# Image handling
+pillow>=10.0.0
+
+# Logging / observability
+structlog>=24.0.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# HTTP client (used by LLM client)
+urllib3>=2.0.0
+
+# Async support
+aiofiles>=23.0.0
+
+# Development / testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.0.0
+
+# API server
+fastapi>=0.110.0
+uvicorn>=0.27.0

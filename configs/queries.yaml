@@ -1,0 +1,37 @@
+queries:
+  # Group A: Veo-specific (highest priority)
+  - "Veo prompt"
+  - "Veo video prompt"
+  - "Veo 3 prompt"
+
+  # Group B: Gemini/Google AI video
+  - "Gemini video prompt"
+  - "Google AI video prompt"
+  - " Imagen video prompt"
+
+  # Group C: General AI video generation
+  - "AI video generation prompt"
+  - "text to video prompt"
+  - "prompt breakdown video"
+
+  # Group D: Video gen with cinematic/professional
+  - "cinematic video prompt"
+  - "professional video generation prompt"
+  - "video shot prompt"
+
+negative_keywords:
+  - "Sora"           # Not Veo
+  - "Runway"
+  - "Pika"
+  - "Kling"
+  - "Luma Dream"
+  - "Hailuo AI"
+  - "Stable Video"
+  - "ChatGPT"
+  - "Doubao"
+  - "Seedance"
+
+expansion:
+  top_n_queries: 5
+  new_query_count: 8
+  min_yield_threshold: 0.01

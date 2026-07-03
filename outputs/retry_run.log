@@ -1,0 +1,8 @@
+Found 5 failed prompts to retry
+  [image_gen] 1/5 done, 1 OK, 0 failed
+  [image_gen] 2/5 done, 2 OK, 0 failed
+  [image_gen] 3/5 done, 3 OK, 0 failed
+  [image_gen] 4/5 done, 4 OK, 0 failed
+  [image_gen] 5/5 done, 5 OK, 0 failed
+Retry: 5 OK, 0 failed in 125s
+  done: 148
